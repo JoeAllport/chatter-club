@@ -2,22 +2,20 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
 const GOOGLE_SCOPES = 'openid email profile'
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
+// mode: 'signin' | 'signup' | 'magic'
 export default function Join() {
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const [mode,       setMode]       = useState('signin')
+  const [email,      setEmail]      = useState('')
+  const [password,   setPassword]   = useState('')
+  const [loading,    setLoading]    = useState(false)
+  const [googleBusy, setGoogleBusy] = useState(false)
+  const [error,      setError]      = useState('')
+  const [magicSent,  setMagicSent]  = useState(false)
 
-  const [email,     setEmail]     = useState('')
-  const [sent,      setSent]      = useState(false)
-  const [loading,   setLoading]   = useState(false)
-  const [googleBusy,setGoogleBusy]= useState(false)
-  const [error,     setError]     = useState('')
-
-  // ── Google OAuth ────────────────────────────────────────────────────────────
+  // ── Google OAuth ─────────────────────────────────────────────────────────────
   async function handleGoogle() {
     setError('')
     setGoogleBusy(true)
@@ -28,17 +26,52 @@ export default function Join() {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
-    if (err) {
-      setError(err.message)
-      setGoogleBusy(false)
-    }
-    // On success Supabase redirects the browser — nothing more to do here
+    if (err) { setError(err.message); setGoogleBusy(false) }
   }
 
-  // ── Magic link ──────────────────────────────────────────────────────────────
+  // ── Password sign-in ─────────────────────────────────────────────────────────
+  async function handleSignIn(e) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    })
+    setLoading(false)
+    if (err) {
+      setError(err.message)
+    } else {
+      navigate('/auth/callback', { replace: true })
+    }
+  }
+
+  // ── Password sign-up ─────────────────────────────────────────────────────────
+  async function handleSignUp(e) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    const { error: err } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+    setLoading(false)
+    if (err) {
+      setError(err.message)
+    } else {
+      // Supabase may auto-confirm (no email verification) or send a confirmation
+      // email depending on project settings. Navigate to callback either way —
+      // if there's a live session it'll redirect to onboarding/home.
+      navigate('/auth/callback', { replace: true })
+    }
+  }
+
+  // ── Magic link ───────────────────────────────────────────────────────────────
   async function handleMagicLink(e) {
     e.preventDefault()
-    if (!email.trim()) return
     setError('')
     setLoading(true)
     const { error: err } = await supabase.auth.signInWithOtp({
@@ -49,88 +82,181 @@ export default function Join() {
       },
     })
     setLoading(false)
-    if (err) {
-      setError(err.message)
-    } else {
-      setSent(true)
-    }
+    if (err) { setError(err.message) } else { setMagicSent(true) }
   }
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  function switchMode(m) {
+    setMode(m)
+    setError('')
+    setMagicSent(false)
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-white flex flex-col">
 
       {/* Top bar */}
       <header className="border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center">
           <Link to="/articles" className="text-lg font-bold text-gray-950 tracking-tight">
             Chatter Club
-          </Link>
-          <Link to="/login" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-            Sign in
           </Link>
         </div>
       </header>
 
-      {/* Main */}
       <main className="flex-1 flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
 
-          {/* Heading */}
+          {/* Logo + heading */}
           <div className="mb-8 text-center">
             <div className="text-4xl mb-3">💬</div>
-            <h1 className="text-2xl font-bold text-gray-950 mb-2">Join Chatter Club</h1>
+            <h1 className="text-2xl font-bold text-gray-950 mb-1">
+              {mode === 'signup' ? 'Create an account' : 'Welcome back'}
+            </h1>
             <p className="text-sm text-gray-500">
-              Read real English. Tap any word to translate. Build vocabulary that sticks.
+              {mode === 'signup'
+                ? 'Read real English. Tap any word to translate.'
+                : 'Sign in to continue learning.'}
             </p>
           </div>
 
-          {sent ? (
-            /* ── Magic link sent ───────────────────────────────────────────── */
-            <div className="text-center">
-              <div className="text-5xl mb-4">📬</div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Check your inbox</h2>
-              <p className="text-sm text-gray-500 mb-6">
-                We've sent a sign-in link to <strong>{email}</strong>. Click it to continue.
-              </p>
+          {/* Mode tabs */}
+          <div className="flex rounded-xl border border-gray-200 mb-6 overflow-hidden text-sm font-medium">
+            {[
+              { key: 'signin', label: 'Sign in' },
+              { key: 'signup', label: 'Sign up' },
+              { key: 'magic',  label: 'Magic link' },
+            ].map(({ key, label }) => (
               <button
-                onClick={() => { setSent(false); setEmail('') }}
-                className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
+                key={key}
+                onClick={() => switchMode(key)}
+                className={`flex-1 py-2.5 transition-colors ${
+                  mode === key
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+                }`}
               >
-                Use a different email
+                {label}
               </button>
+            ))}
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              {error}
             </div>
-          ) : (
-            <>
-              {/* ── Error ──────────────────────────────────────────────────── */}
-              {error && (
-                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                  {error}
-                </div>
-              )}
+          )}
 
-              {/* ── Google OAuth ────────────────────────────────────────────── */}
+          {/* ── Google OAuth (all modes) ────────────────────────────────────── */}
+          <button
+            onClick={handleGoogle}
+            disabled={googleBusy}
+            className="w-full flex items-center justify-center gap-3 h-11 px-4 border border-gray-200 rounded-xl text-sm font-medium text-gray-800 hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed mb-4"
+          >
+            {googleBusy ? <SpinnerIcon /> : <GoogleIcon />}
+            Continue with Google
+          </button>
+
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-gray-100" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+
+          {/* ── Sign in with password ───────────────────────────────────────── */}
+          {mode === 'signin' && (
+            <form onSubmit={handleSignIn} className="flex flex-col gap-3">
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition"
+              />
               <button
-                onClick={handleGoogle}
-                disabled={googleBusy}
-                className="w-full flex items-center justify-center gap-3 h-11 px-4 border border-gray-200 rounded-xl text-sm font-medium text-gray-800 hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed mb-4"
+                type="submit"
+                disabled={loading || !email.trim() || !password}
+                className="h-11 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {googleBusy ? (
-                  <SpinnerIcon />
-                ) : (
-                  <GoogleIcon />
-                )}
-                Continue with Google
+                {loading ? 'Signing in…' : 'Sign in'}
               </button>
+              <button
+                type="button"
+                onClick={() => switchMode('magic')}
+                className="text-xs text-gray-400 hover:text-gray-700 transition-colors text-center"
+              >
+                Forgot password? Use a magic link instead
+              </button>
+            </form>
+          )}
 
-              {/* ── Divider ─────────────────────────────────────────────────── */}
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex-1 h-px bg-gray-100" />
-                <span className="text-xs text-gray-400">or use your email</span>
-                <div className="flex-1 h-px bg-gray-100" />
+          {/* ── Sign up with password ───────────────────────────────────────── */}
+          {mode === 'signup' && (
+            <form onSubmit={handleSignUp} className="flex flex-col gap-3">
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition"
+              />
+              <input
+                type="password"
+                placeholder="Choose a password (min 6 characters)"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete="new-password"
+                className="h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition"
+              />
+              <button
+                type="submit"
+                disabled={loading || !email.trim() || password.length < 6}
+                className="h-11 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Creating account…' : 'Create account'}
+              </button>
+              <p className="text-xs text-gray-400 text-center">
+                By joining you agree to our{' '}
+                <a href="/terms" className="underline hover:text-gray-700">terms</a>
+                {' '}and{' '}
+                <a href="/privacy" className="underline hover:text-gray-700">privacy policy</a>.
+              </p>
+            </form>
+          )}
+
+          {/* ── Magic link ──────────────────────────────────────────────────── */}
+          {mode === 'magic' && (
+            magicSent ? (
+              <div className="text-center">
+                <div className="text-5xl mb-4">📬</div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Check your inbox</h2>
+                <p className="text-sm text-gray-500 mb-6">
+                  We sent a sign-in link to <strong>{email}</strong>.
+                </p>
+                <button
+                  onClick={() => { setMagicSent(false); setEmail('') }}
+                  className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
+                >
+                  Use a different email
+                </button>
               </div>
-
-              {/* ── Magic link form ─────────────────────────────────────────── */}
+            ) : (
               <form onSubmit={handleMagicLink} className="flex flex-col gap-3">
                 <input
                   type="email"
@@ -149,22 +275,9 @@ export default function Join() {
                   {loading ? 'Sending…' : 'Send sign-in link'}
                 </button>
               </form>
-
-              {/* ── Terms nudge ─────────────────────────────────────────────── */}
-              <p className="mt-6 text-center text-xs text-gray-400">
-                By joining you agree to our{' '}
-                <a href="/terms" className="underline hover:text-gray-700">terms</a>
-                {' '}and{' '}
-                <a href="/privacy" className="underline hover:text-gray-700">privacy policy</a>.
-              </p>
-
-              {/* ── Sign in link ─────────────────────────────────────────────── */}
-              <p className="mt-4 text-center text-xs text-gray-400">
-                Already have an account?{' '}
-                <Link to="/login" className="underline hover:text-gray-700">Sign in</Link>
-              </p>
-            </>
+            )
           )}
+
         </div>
       </main>
     </div>
