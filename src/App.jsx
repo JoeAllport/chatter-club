@@ -11,11 +11,12 @@ import StudioSeasons  from './pages/studio/StudioSeasons'
 import StudioCorpus   from './pages/studio/StudioCorpus'
 
 // Public learner pages
-import PlatformHome   from './pages/PlatformHome'
-import ArticleList    from './pages/ArticleList'
-import ArticleReader  from './pages/ArticleReader'
-import WordBank       from './pages/WordBank'
-import LevelTest      from './pages/LevelTest'
+import PlatformHome    from './pages/PlatformHome'
+import ArticleList     from './pages/ArticleList'
+import ArticleReader   from './pages/ArticleReader'
+import WordBank        from './pages/WordBank'
+import LevelTest       from './pages/LevelTest'
+import DailyChallenge  from './pages/DailyChallenge'
 
 // Auth + onboarding
 import Join         from './pages/Join'
@@ -60,10 +61,11 @@ export default function App() {
         <Route element={<ChatterClubLayout />}>
           <Route path="/"              element={<PlatformHome />} />
           <Route path="/home"          element={<PlatformHome />} />
-          <Route path="/articles"      element={<ArticleList />} />
+          <Route path="/challenge"      element={<DailyChallenge />} />
+          <Route path="/articles"       element={<ArticleList />} />
           <Route path="/articles/:slug" element={<ArticleReader />} />
-          <Route path="/word-bank"     element={<WordBank />} />
-          <Route path="/level-test"    element={<LevelTest />} />
+          <Route path="/word-bank"      element={<WordBank />} />
+          <Route path="/level-test"     element={<LevelTest />} />
         </Route>
 
         {/* ── Auth + onboarding (no layout chrome) ──────────────────────── */}

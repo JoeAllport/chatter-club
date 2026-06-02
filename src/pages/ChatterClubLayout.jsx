@@ -49,6 +49,9 @@ export default function ChatterClubLayout() {
                 Home
               </NavLink>
             )}
+            <NavLink to="/challenge" active={location.pathname === '/challenge'}>
+              Daily challenge
+            </NavLink>
             <NavLink to="/articles" active={location.pathname === '/articles'}>
               Articles
             </NavLink>
@@ -92,8 +95,9 @@ export default function ChatterClubLayout() {
         {/* ── Mobile bottom nav ──────────────────────────────────────────── */}
         {userId && (
           <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-100 flex">
-            <MobileNavLink to="/home"     active={location.pathname === '/home'}     icon="🏠" label="Home" />
-            <MobileNavLink to="/articles" active={location.pathname === '/articles'} icon="📖" label="Articles" />
+            <MobileNavLink to="/home"      active={location.pathname === '/home'}      icon="🏠" label="Home" />
+            <MobileNavLink to="/challenge" active={location.pathname === '/challenge'} icon="🔥" label="Challenge" />
+            <MobileNavLink to="/articles"  active={location.pathname === '/articles'}  icon="📖" label="Articles" />
             <MobileNavLink to="/word-bank" active={location.pathname === '/word-bank'} icon="📚" label="Words" />
           </div>
         )}
