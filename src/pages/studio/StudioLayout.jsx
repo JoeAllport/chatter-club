@@ -6,6 +6,7 @@ const NAV = [
   { to: '/studio/articles', icon: '📰', label: 'Articles' },
   { to: '/studio/syllabus', icon: '📚', label: 'Syllabus' },
   { to: '/studio/seasons',  icon: '🗓',  label: 'Seasons'  },
+  { to: '/studio/corpus',   icon: '🔤',  label: 'Corpus'   },
 ]
 
 export default function StudioLayout() {

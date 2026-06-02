@@ -8,6 +8,7 @@ import StudioLayout      from './pages/studio/StudioLayout'
 import StudioArticles from './pages/studio/StudioArticles'
 import StudioSyllabus from './pages/studio/StudioSyllabus'
 import StudioSeasons  from './pages/studio/StudioSeasons'
+import StudioCorpus   from './pages/studio/StudioCorpus'
 
 // Public learner pages
 import PlatformHome   from './pages/PlatformHome'
@@ -80,6 +81,7 @@ export default function App() {
           <Route path="articles" element={<StudioArticles />} />
           <Route path="syllabus" element={<StudioSyllabus />} />
           <Route path="seasons"  element={<StudioSeasons />} />
+          <Route path="corpus"   element={<StudioCorpus />} />
         </Route>
 
         {/* ── Teacher layer (TeachKit) — routes added here as built ─────── */}
