@@ -61,7 +61,7 @@ export default function ChallengeHomeCard({
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-1">
-            {alreadyDone ? 'You're done for today!' : `${dow}, ${dateStr}`}
+            {alreadyDone ? "You’re done for today!" : `${dow}, ${dateStr}`}
           </h1>
           <p className="text-gray-400 text-sm">
             {isWeekend ? 'Weekend quiz' : `Day ${challenge?.day_number} · ${challenge?.title || ''}`}
