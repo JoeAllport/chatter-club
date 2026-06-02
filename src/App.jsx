@@ -1,7 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
-// Layout
+// Layouts
 import ChatterClubLayout from './pages/ChatterClubLayout'
+import StudioLayout      from './pages/studio/StudioLayout'
+
+// Studio pages
+import StudioArticles from './pages/studio/StudioArticles'
+import StudioSyllabus from './pages/studio/StudioSyllabus'
+import StudioSeasons  from './pages/studio/StudioSeasons'
 
 // Public learner pages
 import PlatformHome   from './pages/PlatformHome'
@@ -65,14 +71,16 @@ export default function App() {
         <Route path="/onboarding"    element={<Onboarding />} />
 
         {/* ── Studio — content creation centre (Joe only) ───────────────── */}
-        {/* Pages will be added here as /studio is built */}
-        <Route path="/studio/*" element={
+        <Route path="/studio" element={
           <StudioGuard>
-            <div className="flex items-center justify-center min-h-screen text-gray-400">
-              Studio coming soon
-            </div>
+            <StudioLayout />
           </StudioGuard>
-        } />
+        }>
+          <Route index element={<StudioArticles />} />
+          <Route path="articles" element={<StudioArticles />} />
+          <Route path="syllabus" element={<StudioSyllabus />} />
+          <Route path="seasons"  element={<StudioSeasons />} />
+        </Route>
 
         {/* ── Teacher layer (TeachKit) — routes added here as built ─────── */}
         {/* <Route path="/teach/*" element={<TeachLayout />}> ... </Route> */}
