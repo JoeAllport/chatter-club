@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import PageMeta from '../components/PageMeta'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -231,6 +232,11 @@ export default function ArticleList() {
 
   return (
     <div>
+      <PageMeta
+        title="Read English Articles"
+        description="Real articles at every CEFR level — Foundation (A2+), Standard (B1+), and Advanced (C1). Read, learn vocabulary, and improve your English every day."
+        canonical="/articles"
+      />
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <section className="border-b border-gray-100 py-14">
         <div className="max-w-5xl mx-auto px-6">

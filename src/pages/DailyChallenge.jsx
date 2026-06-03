@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 // ── Sub-components ────────────────────────────────────────────────────────────
 import ChallengeSession  from '../components/challenge/ChallengeSession'
 import ChallengeHomeCard from '../components/challenge/ChallengeHomeCard'
+import PageMeta          from '../components/PageMeta'
 
 // ── DailyChallenge page ───────────────────────────────────────────────────────
 // Entry point: shows home card → launches session on Start
@@ -174,19 +175,33 @@ export default function DailyChallenge() {
 
   if (state === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <>
+        <PageMeta
+          title="Daily Challenge"
+          description="Complete today's English challenge. Learn a new word, read a short passage, and test yourself — in under 5 minutes."
+          canonical="/challenge"
+        />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </>
     )
   }
 
   if (state === 'no_challenge') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-        <p className="text-5xl mb-4">😴</p>
-        <h2 className="text-2xl font-bold text-white mb-2">No challenge today</h2>
-        <p className="text-gray-400">Come back tomorrow — or on a weekday.</p>
-      </div>
+      <>
+        <PageMeta
+          title="Daily Challenge"
+          description="Complete today's English challenge. Learn a new word, read a short passage, and test yourself — in under 5 minutes."
+          canonical="/challenge"
+        />
+        <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+          <p className="text-5xl mb-4">😴</p>
+          <h2 className="text-2xl font-bold text-white mb-2">No challenge today</h2>
+          <p className="text-gray-400">Come back tomorrow — or on a weekday.</p>
+        </div>
+      </>
     )
   }
 
@@ -204,16 +219,23 @@ export default function DailyChallenge() {
 
   // 'home' or 'already_done'
   return (
-    <ChallengeHomeCard
-      challenge={challenge}
-      season={season}
-      word={word}
-      streak={streak}
-      completion={completion}
-      alreadyDone={state === 'already_done'}
-      onStart={handleStart}
-      onSignIn={() => navigate('/join')}
-      user={user}
-    />
+    <>
+      <PageMeta
+        title="Daily Challenge"
+        description="Complete today's English challenge. Learn a new word, read a short passage, and test yourself — in under 5 minutes."
+        canonical="/challenge"
+      />
+      <ChallengeHomeCard
+        challenge={challenge}
+        season={season}
+        word={word}
+        streak={streak}
+        completion={completion}
+        alreadyDone={state === 'already_done'}
+        onStart={handleStart}
+        onSignIn={() => navigate('/join')}
+        user={user}
+      />
+    </>
   )
 }

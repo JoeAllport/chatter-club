@@ -1,0 +1,10 @@
+# TODO: swap chatterclub.app for real domain when decided
+User-agent: *
+Allow: /
+
+# Don't index studio or auth callback pages
+Disallow: /studio
+Disallow: /auth/callback
+Disallow: /onboarding
+
+Sitemap: https://chatterclub.app/sitemap.xml

@@ -334,7 +334,7 @@ function SEOHead({ article }) {
     setMeta('twitter:description', desc)
     if (article.cover_image_url) setMeta('twitter:image', article.cover_image_url)
 
-    return () => { document.title = 'Hey Joe English' }
+    return () => { document.title = 'Chatter Club — Learn English Every Day' }
   }, [article])
 
   return null

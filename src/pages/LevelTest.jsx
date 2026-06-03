@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAdaptiveTest, LEVELS } from '../hooks/useAdaptiveTest'
+import PageMeta from '../components/PageMeta'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -98,6 +99,11 @@ export default function LevelTest() {
   if (items === null) {
     return (
       <PageShell>
+        <PageMeta
+          title="English Level Test"
+          description="Find your CEFR level in 10 minutes. Adaptive test from A1 to C2 — no sign-up required."
+          canonical="/level-test"
+        />
         <div className="flex flex-col items-center justify-center min-h-[50vh]">
           <p className="text-sm text-gray-400 animate-pulse">Loading questions…</p>
         </div>

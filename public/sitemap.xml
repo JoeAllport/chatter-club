@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TODO: swap chatterclub.app for real domain when decided.
+  TODO: add dynamic article URLs once you have published articles.
+        Each article should appear as /articles/:slug with its published_at date.
+        Generate this dynamically via a build script or Edge Function if needed.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Home -->
+  <url>
+    <loc>https://chatterclub.app/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Daily challenge -->
+  <url>
+    <loc>https://chatterclub.app/challenge</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Articles index -->
+  <url>
+    <loc>https://chatterclub.app/articles</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Word bank (logged-in only — still worth indexing the page) -->
+  <url>
+    <loc>https://chatterclub.app/words</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- Level test -->
+  <url>
+    <loc>https://chatterclub.app/level-test</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Sign up / join -->
+  <url>
+    <loc>https://chatterclub.app/join</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>

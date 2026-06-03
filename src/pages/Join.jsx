@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import PageMeta from '../components/PageMeta'
 
 const GOOGLE_SCOPES = 'openid email profile'
 
@@ -94,6 +95,11 @@ export default function Join() {
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <PageMeta
+        title="Join Chatter Club"
+        description="Create a free account to save your progress, track your streak, and build your word bank."
+        canonical="/join"
+      />
 
       {/* Top bar */}
       <header className="border-b border-gray-100">
