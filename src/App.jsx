@@ -18,6 +18,10 @@ import WordBank        from './pages/WordBank'
 import LevelTest       from './pages/LevelTest'
 import DailyChallenge  from './pages/DailyChallenge'
 
+// Puzzle games
+import PuzzleHub    from './pages/puzzles/PuzzleHub'
+import PuzzleWordle from './pages/puzzles/PuzzleWordle'
+
 // Auth + onboarding
 import Join         from './pages/Join'
 import AuthCallback from './pages/AuthCallback'
@@ -66,6 +70,9 @@ export default function App() {
           <Route path="/articles/:slug" element={<ArticleReader />} />
           <Route path="/word-bank"      element={<WordBank />} />
           <Route path="/level-test"     element={<LevelTest />} />
+          {/* Puzzle games */}
+          <Route path="/puzzles"         element={<PuzzleHub />} />
+          <Route path="/puzzles/wordle"  element={<PuzzleWordle />} />
         </Route>
 
         {/* ── Auth + onboarding (no layout chrome) ──────────────────────── */}

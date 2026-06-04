@@ -28,6 +28,13 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Puzzle games hub -->
+  <url>
+    <loc>https://chatterclub.app/puzzles</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Word bank (logged-in only — still worth indexing the page) -->
   <url>
     <loc>https://chatterclub.app/words</loc>
