@@ -179,41 +179,108 @@ function TappableBody({ text, wordContexts, onWordTap, savedLemmas }) {
   return (
     <div className="space-y-5">
       {paragraphs.map((para, pi) => {
+        // Split into word tokens preserving whitespace
         const tokens = para.split(/(\s+)/)
-        return (
-          <p key={pi} className="leading-8">
-            {tokens.map((token, ti) => {
-              if (/^\s+$/.test(token)) return token
-              const clean = stripPunctuation(token)
-              if (!clean) return <span key={ti}>{token}</span>
+        // Build a cleaned version of each token for phrase lookahead
+        const cleaned = tokens.map(t => /^\s+$/.test(t) ? '' : stripPunctuation(t).toLowerCase())
 
-              const cleanLower = clean.toLowerCase()
-              const ctx        = wordContexts[cleanLower]
-              const isSaved    = savedLemmas.has(ctx?.lemma || cleanLower)
-              const before     = token.slice(0, token.indexOf(clean))
-              const after      = token.slice(token.indexOf(clean) + clean.length)
+        const rendered = []
+        let skipUntil = -1  // index to skip tokens already consumed by a phrase
 
-              return (
-                <span key={ti}>
-                  {before}
-                  <span
-                    onClick={e => {
-                      e.stopPropagation()
-                      onWordTap(clean, ctx)
-                    }}
-                    className={`cursor-pointer rounded px-0.5 -mx-0.5 transition-colors select-none
-                      ${ctx ? 'hover:bg-blue-100 active:bg-blue-200' : 'hover:bg-gray-100'}
-                      ${isSaved ? 'underline decoration-dotted decoration-blue-400 underline-offset-2' : ''}
-                    `}
-                  >
-                    {clean}
-                  </span>
-                  {after}
+        tokens.forEach((token, ti) => {
+          if (skipUntil > ti) return  // consumed by a preceding phrase match
+
+          if (/^\s+$/.test(token)) {
+            rendered.push(token)
+            return
+          }
+
+          const clean = stripPunctuation(token)
+          if (!clean) { rendered.push(<span key={ti}>{token}</span>); return }
+
+          const cleanLower = clean.toLowerCase()
+          const before = token.slice(0, token.indexOf(clean))
+          const after  = token.slice(token.indexOf(clean) + clean.length)
+
+          // ── Phrase lookahead (up to 4 words) ────────────────────────────
+          // Build candidate phrases of decreasing length and check wordContexts
+          let phraseCtx = null
+          let phraseTokenCount = 0
+          let phraseText = ''
+
+          for (let len = 4; len >= 2; len--) {
+            // Gather the next `len` word tokens (skipping whitespace tokens)
+            const wordTokens = []
+            let j = ti
+            while (wordTokens.length < len && j < tokens.length) {
+              if (!/^\s+$/.test(tokens[j])) wordTokens.push(cleaned[j] || '')
+              j++
+            }
+            if (wordTokens.length < len) continue
+
+            const candidate = wordTokens.join(' ')
+            if (wordContexts[candidate]) {
+              phraseCtx = wordContexts[candidate]
+              phraseText = wordTokens.join(' ')
+              // Count how many tokens (including spaces) we consumed
+              let count = 0
+              let found = 0
+              let k = ti
+              while (found < len && k < tokens.length) {
+                count++
+                if (!/^\s+$/.test(tokens[k])) found++
+                k++
+              }
+              phraseTokenCount = count
+              break
+            }
+          }
+
+          if (phraseCtx) {
+            // Render the whole phrase as a single tappable span
+            const isSaved = savedLemmas.has(phraseCtx.lemma || phraseText)
+            skipUntil = ti + phraseTokenCount
+            rendered.push(
+              <span key={ti}>
+                {before}
+                <span
+                  onClick={e => { e.stopPropagation(); onWordTap(phraseText, phraseCtx) }}
+                  className={`cursor-pointer rounded px-0.5 -mx-0.5 transition-colors select-none
+                    bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200
+                    ${isSaved ? 'underline decoration-dotted decoration-indigo-400 underline-offset-2' : ''}
+                  `}
+                  title="Phrasal verb / expression"
+                >
+                  {phraseText}
                 </span>
-              )
-            })}
-          </p>
-        )
+                {after}
+              </span>
+            )
+            return
+          }
+
+          // ── Single word fallback ─────────────────────────────────────────
+          const ctx     = wordContexts[cleanLower]
+          const isSaved = savedLemmas.has(ctx?.lemma || cleanLower)
+
+          rendered.push(
+            <span key={ti}>
+              {before}
+              <span
+                onClick={e => { e.stopPropagation(); onWordTap(clean, ctx) }}
+                className={`cursor-pointer rounded px-0.5 -mx-0.5 transition-colors select-none
+                  ${ctx ? 'hover:bg-blue-100 active:bg-blue-200' : 'hover:bg-gray-100'}
+                  ${isSaved ? 'underline decoration-dotted decoration-blue-400 underline-offset-2' : ''}
+                `}
+              >
+                {clean}
+              </span>
+              {after}
+            </span>
+          )
+        })
+
+        return <p key={pi} className="leading-8">{rendered}</p>
       })}
     </div>
   )
@@ -478,12 +545,17 @@ export default function ArticleReader() {
   async function loadWordContexts(articleId, lang = nativeLang) {
     const { data } = await supabase
       .from('article_word_contexts')
-      .select('surface_form, lemma, translation, context_note, part_of_speech, pronunciation, example_sentence')
+      .select('surface_form, phrase_key, lemma, translation, context_note, part_of_speech, pronunciation, example_sentence')
       .eq('article_id', articleId)
       .eq('target_lang', lang)
     if (data) {
       const map = {}
-      data.forEach(r => { map[r.surface_form.toLowerCase()] = r })
+      data.forEach(r => {
+        // Index by surface_form for single-word lookup
+        map[r.surface_form.toLowerCase()] = r
+        // Also index by phrase_key (the full expression) for phrase lookup
+        if (r.phrase_key) map[r.phrase_key.toLowerCase()] = r
+      })
       setWordContexts(map)
     }
   }
