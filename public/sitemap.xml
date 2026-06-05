@@ -28,10 +28,59 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Podcast -->
+  <url>
+    <loc>https://chatterclub.app/podcasts</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Puzzle games hub -->
   <url>
     <loc>https://chatterclub.app/puzzles</loc>
     <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- WordUp -->
+  <url>
+    <loc>https://chatterclub.app/puzzles/wordle</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Clusters -->
+  <url>
+    <loc>https://chatterclub.app/puzzles/connections</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Word Ladder -->
+  <url>
+    <loc>https://chatterclub.app/puzzles/ladder</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Letter Hive -->
+  <url>
+    <loc>https://chatterclub.app/puzzles/hive</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Mini Crossword -->
+  <url>
+    <loc>https://chatterclub.app/puzzles/crossword</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Courses index -->
+  <url>
+    <loc>https://chatterclub.app/courses</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 

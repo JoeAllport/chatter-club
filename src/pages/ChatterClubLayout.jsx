@@ -55,6 +55,12 @@ export default function ChatterClubLayout() {
             <NavLink to="/puzzles" active={location.pathname.startsWith('/puzzles')}>
               Puzzles
             </NavLink>
+            <NavLink to="/podcasts" active={location.pathname.startsWith('/podcasts')}>
+              Podcast
+            </NavLink>
+            <NavLink to="/courses" active={location.pathname.startsWith('/courses')}>
+              Courses
+            </NavLink>
             <NavLink to="/articles" active={location.pathname === '/articles'}>
               Articles
             </NavLink>
@@ -119,6 +125,7 @@ export default function ChatterClubLayout() {
           <div className="flex items-center gap-4">
             {userId && <Link to="/home"     className="hover:text-gray-700 transition-colors">Home</Link>}
             <Link to="/articles"            className="hover:text-gray-700 transition-colors">Articles</Link>
+            <Link to="/courses"            className="hover:text-gray-700 transition-colors">Courses</Link>
             {userId && <Link to="/word-bank" className="hover:text-gray-700 transition-colors">Word bank</Link>}
             <Link to="/join"               className="hover:text-gray-700 transition-colors">Join</Link>
           </div>

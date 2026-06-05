@@ -5,7 +5,8 @@ import PageMeta from '../../components/PageMeta'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const MAX_GUESSES = 6
+const MAX_GUESSES  = 6
+const WORD_LENGTH  = 6   // WordUp uses exactly 6-letter words
 
 // Tile states
 const EMPTY    = 'empty'
@@ -173,6 +174,13 @@ export default function PuzzleWordle() {
         return
       }
 
+      // Sanity-check word length
+      if (puzzleData.content?.word?.length !== WORD_LENGTH) {
+        setError(`Puzzle error: word must be exactly ${WORD_LENGTH} letters.`)
+        setLoading(false)
+        return
+      }
+
       setPuzzle({ id: puzzleData.id, ...puzzleData.content })
 
       // Load existing completion if user is signed in
@@ -208,7 +216,6 @@ export default function PuzzleWordle() {
   const handleKey = useCallback((key) => {
     if (gameState !== 'playing' || !puzzle) return
     const target = puzzle.word.toLowerCase()
-    const wordLen = target.length
 
     if (key === '⌫' || key === 'BACKSPACE') {
       setCurrentGuess(g => g.slice(0, -1))
@@ -216,9 +223,9 @@ export default function PuzzleWordle() {
     }
 
     if (key === 'ENTER') {
-      if (currentGuess.length < wordLen) {
+      if (currentGuess.length < WORD_LENGTH) {
         setShake(true)
-        setMessage(`Word must be ${wordLen} letters`)
+        setMessage(`Word must be ${WORD_LENGTH} letters`)
         setTimeout(() => { setShake(false); setMessage('') }, 600)
         return
       }
@@ -252,7 +259,7 @@ export default function PuzzleWordle() {
     }
 
     // Letter key
-    if (/^[A-Za-z]$/.test(key) && currentGuess.length < wordLen) {
+    if (/^[A-Za-z]$/.test(key) && currentGuess.length < WORD_LENGTH) {
       setCurrentGuess(g => g + key.toLowerCase())
     }
   }, [gameState, puzzle, currentGuess, guesses, userId])
@@ -285,8 +292,7 @@ export default function PuzzleWordle() {
     </div>
   )
 
-  const wordLen = puzzle?.word?.length || 5
-  const target  = puzzle?.word?.toLowerCase() || ''
+  const target = puzzle?.word?.toLowerCase() || ''
 
   // Build the grid rows
   const rows = []
@@ -295,10 +301,10 @@ export default function PuzzleWordle() {
       rows.push({ scored: guesses[i], revealed: reveal.includes(i) })
     } else if (i === guesses.length && gameState === 'playing') {
       // Current input row
-      const letters = currentGuess.padEnd(wordLen, '').split('')
+      const letters = currentGuess.padEnd(WORD_LENGTH, '').split('')
       rows.push({ current: letters })
     } else {
-      rows.push({ empty: true, len: wordLen })
+      rows.push({ empty: true, len: WORD_LENGTH })
     }
   }
 
@@ -353,7 +359,7 @@ export default function PuzzleWordle() {
                 />
               ))
             ) : (
-              Array(row.len || wordLen).fill('').map((_, ci) => (
+              Array(WORD_LENGTH).fill('').map((_, ci) => (
                 <Tile key={ci} letter="" state={EMPTY} reveal={false} />
               ))
             )}

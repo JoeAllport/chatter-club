@@ -4,6 +4,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 const NAV = [
   { to: '/studio/articles', icon: '📰', label: 'Articles' },
+  { to: '/studio/courses',  icon: '🎓', label: 'Courses'  },
   { to: '/studio/syllabus', icon: '📚', label: 'Syllabus' },
   { to: '/studio/seasons',  icon: '🗓',  label: 'Seasons'  },
   { to: '/studio/corpus',   icon: '🔤',  label: 'Corpus'   },

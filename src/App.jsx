@@ -6,6 +6,7 @@ import StudioLayout      from './pages/studio/StudioLayout'
 
 // Studio pages
 import StudioArticles from './pages/studio/StudioArticles'
+import StudioCourses  from './pages/studio/StudioCourses'
 import StudioSyllabus from './pages/studio/StudioSyllabus'
 import StudioSeasons  from './pages/studio/StudioSeasons'
 import StudioCorpus   from './pages/studio/StudioCorpus'
@@ -17,10 +18,18 @@ import ArticleReader   from './pages/ArticleReader'
 import WordBank        from './pages/WordBank'
 import LevelTest       from './pages/LevelTest'
 import DailyChallenge  from './pages/DailyChallenge'
+import PodcastList     from './pages/PodcastList'
+import PodcastPlayer   from './pages/PodcastPlayer'
+import CourseList      from './pages/CourseList'
+import CoursePlayer    from './pages/CoursePlayer'
 
 // Puzzle games
-import PuzzleHub    from './pages/puzzles/PuzzleHub'
-import PuzzleWordle from './pages/puzzles/PuzzleWordle'
+import PuzzleHub         from './pages/puzzles/PuzzleHub'
+import PuzzleWordle      from './pages/puzzles/PuzzleWordle'
+import PuzzleConnections from './pages/puzzles/PuzzleConnections'
+import PuzzleLadder      from './pages/puzzles/PuzzleLadder'
+import PuzzleHive        from './pages/puzzles/PuzzleHive'
+import PuzzleCrossword   from './pages/puzzles/PuzzleCrossword'
 
 // Auth + onboarding
 import Join         from './pages/Join'
@@ -70,9 +79,18 @@ export default function App() {
           <Route path="/articles/:slug" element={<ArticleReader />} />
           <Route path="/word-bank"      element={<WordBank />} />
           <Route path="/level-test"     element={<LevelTest />} />
+          <Route path="/podcasts"       element={<PodcastList />} />
+          <Route path="/podcasts/:id"   element={<PodcastPlayer />} />
+          {/* Courses */}
+          <Route path="/courses"        element={<CourseList />} />
+          <Route path="/courses/:slug"  element={<CoursePlayer />} />
           {/* Puzzle games */}
-          <Route path="/puzzles"         element={<PuzzleHub />} />
-          <Route path="/puzzles/wordle"  element={<PuzzleWordle />} />
+          <Route path="/puzzles"              element={<PuzzleHub />} />
+          <Route path="/puzzles/wordle"       element={<PuzzleWordle />} />
+          <Route path="/puzzles/connections"  element={<PuzzleConnections />} />
+          <Route path="/puzzles/ladder"       element={<PuzzleLadder />} />
+          <Route path="/puzzles/hive"         element={<PuzzleHive />} />
+          <Route path="/puzzles/crossword"    element={<PuzzleCrossword />} />
         </Route>
 
         {/* ── Auth + onboarding (no layout chrome) ──────────────────────── */}
@@ -88,6 +106,7 @@ export default function App() {
         }>
           <Route index element={<StudioArticles />} />
           <Route path="articles" element={<StudioArticles />} />
+          <Route path="courses"  element={<StudioCourses />} />
           <Route path="syllabus" element={<StudioSyllabus />} />
           <Route path="seasons"  element={<StudioSeasons />} />
           <Route path="corpus"   element={<StudioCorpus />} />
