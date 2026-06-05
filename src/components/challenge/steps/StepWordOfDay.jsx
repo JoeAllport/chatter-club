@@ -34,6 +34,18 @@ export default function StepWordOfDay({ word, season, onDone }) {
           border: `1px solid ${season?.colour ? `${season.colour}30` : '#4f46e530'}`,
         }}
       >
+        {/* Icon (Noun Project — only for concrete nouns/verbs) */}
+        {word.icon_url && (
+          <div className="flex justify-center mb-5">
+            <img
+              src={word.icon_url}
+              alt={word.word}
+              className="w-16 h-16 opacity-80"
+              style={{ filter: `invert(1) sepia(1) saturate(2) hue-rotate(${season?.colour ? '200deg' : '220deg'})` }}
+            />
+          </div>
+        )}
+
         {/* Word */}
         <h1
           className="text-5xl font-bold tracking-tight mb-3"

@@ -462,14 +462,28 @@ export default function StudioCorpus() {
                 {words.map(word => (
                   <tr key={word.id} className="hover:bg-gray-800/40 group">
                     <td className="px-4 py-3">
-                      <div>
-                        <span className="text-white font-medium">{word.word}</span>
-                        {word.ipa && (
-                          <span className="ml-2 text-gray-500 text-xs font-normal">{word.ipa}</span>
+                      <div className="flex items-center gap-2">
+                        {/* Icon thumbnail — shown once enrich_vocab_icons.py has run */}
+                        {word.icon_url ? (
+                          <img
+                            src={word.icon_url}
+                            alt={word.word}
+                            title="Icon from Noun Project"
+                            className="w-6 h-6 opacity-60 flex-shrink-0"
+                            style={{ filter: 'invert(1)' }}
+                          />
+                        ) : (
+                          <span className="w-6 h-6 flex-shrink-0 rounded border border-gray-700 flex items-center justify-center text-gray-700 text-xs" title="No icon yet">–</span>
                         )}
-                        {word.frequency_rank && (
-                          <span className="ml-1.5 text-gray-600 text-xs">#{word.frequency_rank}</span>
-                        )}
+                        <div>
+                          <span className="text-white font-medium">{word.word}</span>
+                          {word.ipa && (
+                            <span className="ml-2 text-gray-500 text-xs font-normal">{word.ipa}</span>
+                          )}
+                          {word.frequency_rank && (
+                            <span className="ml-1.5 text-gray-600 text-xs">#{word.frequency_rank}</span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-300 max-w-xs">
