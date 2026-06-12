@@ -22,6 +22,7 @@ import PodcastList     from './pages/PodcastList'
 import PodcastPlayer   from './pages/PodcastPlayer'
 import CourseList      from './pages/CourseList'
 import CoursePlayer    from './pages/CoursePlayer'
+import LessonSession   from './pages/session/LessonSession'
 
 // Puzzle games
 import PuzzleHub         from './pages/puzzles/PuzzleHub'
@@ -92,6 +93,12 @@ export default function App() {
           <Route path="/puzzles/hive"         element={<PuzzleHive />} />
           <Route path="/puzzles/crossword"    element={<PuzzleCrossword />} />
         </Route>
+
+        {/* ── Lesson session — full screen, no layout chrome ─────────────── */}
+        <Route
+          path="/courses/:slug/chapters/:chapterId"
+          element={<LessonSession />}
+        />
 
         {/* ── Auth + onboarding (no layout chrome) ──────────────────────── */}
         <Route path="/join"          element={<Join />} />

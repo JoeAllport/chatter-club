@@ -902,7 +902,7 @@ export default function CoursePlayer() {
               return (
                 <button
                   key={ch.id}
-                  onClick={() => { if (!chLocked) { setActiveChapterId(ch.id); setSidebarOpen(false) } }}
+                  onClick={() => { if (!chLocked) { navigate(`/courses/${slug}/chapters/${ch.id}`) } }}
                   className={cn(
                     'w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors',
                     active
@@ -1008,7 +1008,7 @@ export default function CoursePlayer() {
           <main className="min-h-[60vh]">
             {!activeChapter ? (
               <div className="py-20 text-center text-gray-400">
-                <p>No chapters yet — check back soon.</p>
+                <p>Select a chapter to begin.</p>
               </div>
             ) : (
               <div className="space-y-6">
@@ -1037,70 +1037,19 @@ export default function CoursePlayer() {
 
                 <div className="border-t border-gray-100" />
 
-                {/* Content */}
                 {locked ? (
                   <LockedChapter reason={locked} />
-                ) : chapterLoading ? (
-                  <div className="py-16 text-center">
-                    <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                  </div>
-                ) : blocks.length === 0 ? (
-                  <div className="py-12 text-center text-gray-400">
-                    <p className="text-sm">No content in this chapter yet.</p>
-                  </div>
                 ) : (
-                  <div className="space-y-6">
-                    {blocks.map(block => (
-                      <div
-                        key={block.id}
-                        className={
-                          ['text', 'instructions'].includes(block.block_type)
-                            ? ''
-                            : 'bg-white rounded-2xl border border-gray-100 shadow-sm p-5'
-                        }
-                      >
-                        <BlockRenderer
-                          block={block}
-                          response={responses[block.id]?.response}
-                          submitted={responses[block.id]?.submitted || false}
-                          onSubmit={(responseData, scorePct) => {
-                            if (block.block_type === 'writing_task') {
-                              return handleWritingSubmit(block.id, responseData)
-                            }
-                            return handleBlockSubmit(block.id, block.is_scored, responseData, scorePct)
-                          }}
-                        />
-                      </div>
-                    ))}
-
-                    {/* Mark complete */}
-                    <div className="pt-4 border-t border-gray-100">
-                      {alreadyComplete ? (
-                        <div className="flex items-center justify-between">
-                          <span className="text-green-600 font-semibold text-sm">✓ Chapter complete</span>
-                          <button
-                            onClick={() => {
-                              const allCh = units.flatMap(u => u.chapters)
-                              const curIdx = allCh.findIndex(ch => ch.id === activeChapterId)
-                              if (curIdx >= 0 && curIdx < allCh.length - 1) {
-                                setActiveChapterId(allCh[curIdx + 1].id)
-                              }
-                            }}
-                            className="text-sm text-indigo-600 font-medium hover:underline"
-                          >
-                            Next chapter →
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={handleMarkComplete}
-                          disabled={completing}
-                          className="w-full py-3 rounded-xl font-semibold text-white text-sm bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 transition-colors"
-                        >
-                          {completing ? 'Saving…' : 'Mark complete ✓'}
-                        </button>
-                      )}
-                    </div>
+                  <div className="py-8 flex flex-col items-center gap-4">
+                    <button
+                      onClick={() => navigate(`/courses/${slug}/chapters/${activeChapterId}`)}
+                      className="px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl text-base hover:bg-indigo-700 active:scale-95 transition-all shadow-sm"
+                    >
+                      {alreadyComplete ? 'Review lesson →' : 'Start lesson →'}
+                    </button>
+                    {alreadyComplete && (
+                      <p className="text-xs text-gray-400">You've completed this chapter. Start again to review.</p>
+                    )}
                   </div>
                 )}
               </div>
