@@ -652,12 +652,24 @@ export default function CoursePlayer() {
       const { data: { user: u } } = await supabase.auth.getUser()
       setUser(u)
 
-      const { data: courseData } = await supabase
+      // Try slug first, then fall back to id (avoids malformed UUID in .or())
+      let { data: courseData } = await supabase
         .from('courses')
         .select('id, title, description, slug, level, topic_tags, is_free, status')
-        .or(`slug.eq.${slug},id.eq.${slug}`)
+        .eq('slug', slug)
         .eq('status', 'published')
-        .single()
+        .maybeSingle()
+
+      if (!courseData) {
+        // slug didn't match — try treating it as a UUID
+        const { data: byId } = await supabase
+          .from('courses')
+          .select('id, title, description, slug, level, topic_tags, is_free, status')
+          .eq('id', slug)
+          .eq('status', 'published')
+          .maybeSingle()
+        courseData = byId
+      }
 
       if (!courseData) { navigate('/courses'); return }
       setCourse(courseData)
