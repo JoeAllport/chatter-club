@@ -169,6 +169,42 @@ export function buildQueue(blocks, mode = 'learn') {
         })
         break
 
+      case 'vocabulary': {
+        // Each vocab item becomes a word_flash screen
+        const items = block.content?.items || block.content?.vocab_items || []
+        items.forEach((item, i) => {
+          queue.push({
+            id: `${block.id}-flash-${i}`,
+            type: 'word_flash',
+            blockId: block.id,
+            isScored: true,
+            data: {
+              word: item.word,
+              pos: item.pos || item.part_of_speech || null,
+              definition: item.definition,
+              example: item.example || null,
+              collocations: item.collocations || null,
+              wordFamily: item.wordFamily || item.word_family || null,
+              itemIndex: i,
+              totalItems: items.length,
+            },
+          })
+        })
+        break
+      }
+
+      case 'speed_round': {
+        // The whole block is one timed game screen
+        queue.push({
+          id: `${block.id}-speed`,
+          type: 'speed_round',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
       case 'answer_key':
         // Never shown to students
         break

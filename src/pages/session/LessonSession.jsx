@@ -20,13 +20,15 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { buildQueue } from './buildQueue'
 import ReferencePopover from './ReferencePopover'
-import IntroScreen     from './screens/IntroScreen'
-import MCQScreen       from './screens/MCQScreen'
-import ClozeScreen     from './screens/ClozeScreen'
-import WordFormScreen  from './screens/WordFormScreen'
-import TransformScreen from './screens/TransformScreen'
-import MatchScreen     from './screens/MatchScreen'
+import IntroScreen      from './screens/IntroScreen'
+import MCQScreen        from './screens/MCQScreen'
+import ClozeScreen      from './screens/ClozeScreen'
+import WordFormScreen   from './screens/WordFormScreen'
+import TransformScreen  from './screens/TransformScreen'
+import MatchScreen      from './screens/MatchScreen'
 import CompletionScreen from './screens/CompletionScreen'
+import WordFlashScreen  from './screens/WordFlashScreen'
+import SpeedRoundScreen from './screens/SpeedRoundScreen'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
@@ -71,6 +73,10 @@ function ScreenRenderer({ screen, onNext }) {
       return <TransformScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'match_pair':
       return <MatchScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'word_flash':
+      return <WordFlashScreen data={screen.data} onNext={(correct, flag) => onNext(correct)} />
+    case 'speed_round':
+      return <SpeedRoundScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'writing':
       // Writing tasks break out of the step flow — shown as a full screen
       return <WritingScreen data={screen.data} onNext={() => onNext(null)} />
