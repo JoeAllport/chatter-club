@@ -291,6 +291,50 @@ export function buildQueue(blocks, mode = 'learn') {
         break
       }
 
+      case 'pronoun_tracker': {
+        queue.push({
+          id: `${block.id}-pt`,
+          type: 'pronoun_tracker',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
+      case 'true_match': {
+        queue.push({
+          id: `${block.id}-tm`,
+          type: 'true_match',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
+      case 'distractor_spotter': {
+        queue.push({
+          id: `${block.id}-ds`,
+          type: 'distractor_spotter',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
+      case 'highlight_task': {
+        queue.push({
+          id: `${block.id}-hl`,
+          type: 'highlight_task',
+          blockId: block.id,
+          isScored: false,
+          data: { ...block.content, mode: 'highlight' },
+        })
+        break
+      }
+
       case 'answer_key':
         // Never shown to students
         break

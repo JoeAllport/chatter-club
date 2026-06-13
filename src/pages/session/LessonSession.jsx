@@ -35,6 +35,9 @@ import PrepSprintScreen       from './screens/PrepSprintScreen'
 import CollocationSnapScreen  from './screens/CollocationSnapScreen'
 import WordFamilyScreen          from './screens/WordFamilyScreen'
 import TransformAnalyserScreen  from './screens/TransformAnalyserScreen'
+import PronounTrackerScreen     from './screens/PronounTrackerScreen'
+import TrueMatchScreen          from './screens/TrueMatchScreen'
+import DistractorSpotterScreen  from './screens/DistractorSpotterScreen'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
@@ -89,6 +92,13 @@ function ScreenRenderer({ screen, onNext }) {
       return <WordFamilyScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'transform_analyser':
       return <TransformAnalyserScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'pronoun_tracker':
+      return <PronounTrackerScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'true_match':
+      return <TrueMatchScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'distractor_spotter':
+    case 'highlight_task':
+      return <DistractorSpotterScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'word_flash':
       return <WordFlashScreen data={screen.data} onNext={(correct, flag) => onNext(correct)} />
     case 'speed_round':
