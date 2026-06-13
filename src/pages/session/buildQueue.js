@@ -269,6 +269,17 @@ export function buildQueue(blocks, mode = 'learn') {
         break
       }
 
+      case 'word_family_builder': {
+        queue.push({
+          id: `${block.id}-wfb`,
+          type: 'word_family',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
       case 'answer_key':
         // Never shown to students
         break
