@@ -205,6 +205,18 @@ export function buildQueue(blocks, mode = 'learn') {
         break
       }
 
+      case 'memory_pairs': {
+        // One flip-card game screen — pairs come from content.pairs
+        queue.push({
+          id: `${block.id}-memory`,
+          type: 'memory_pairs',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
       case 'answer_key':
         // Never shown to students
         break

@@ -27,8 +27,9 @@ import WordFormScreen   from './screens/WordFormScreen'
 import TransformScreen  from './screens/TransformScreen'
 import MatchScreen      from './screens/MatchScreen'
 import CompletionScreen from './screens/CompletionScreen'
-import WordFlashScreen  from './screens/WordFlashScreen'
-import SpeedRoundScreen from './screens/SpeedRoundScreen'
+import WordFlashScreen   from './screens/WordFlashScreen'
+import SpeedRoundScreen  from './screens/SpeedRoundScreen'
+import MemoryPairsScreen from './screens/MemoryPairsScreen'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
@@ -77,6 +78,8 @@ function ScreenRenderer({ screen, onNext }) {
       return <WordFlashScreen data={screen.data} onNext={(correct, flag) => onNext(correct)} />
     case 'speed_round':
       return <SpeedRoundScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'memory_pairs':
+      return <MemoryPairsScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'writing':
       // Writing tasks break out of the step flow — shown as a full screen
       return <WritingScreen data={screen.data} onNext={() => onNext(null)} />
@@ -222,11 +225,21 @@ export default function LessonSession() {
       const q = buildQueue(blockData || [])
       setQueue(q)
 
-      // Build reference from vocab/grammar blocks
-      // For now derive from text blocks — later can be a dedicated 'reference' block type
+      // Build reference from vocabulary + matching blocks
       const refVocab = []
       const refGrammar = []
       ;(blockData || []).forEach(b => {
+        if (b.block_type === 'vocabulary' && b.content?.items) {
+          b.content.items.forEach(item => {
+            refVocab.push({
+              word: item.word,
+              pos: item.pos || null,
+              definition: item.definition,
+              example: item.example || null,
+              collocations: item.collocations || null,
+            })
+          })
+        }
         if (b.block_type === 'matching' && b.content?.pairs) {
           b.content.pairs.forEach(p => {
             refVocab.push({ word: p.term, definition: p.definition })
