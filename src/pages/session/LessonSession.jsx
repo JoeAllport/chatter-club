@@ -41,6 +41,7 @@ import DistractorSpotterScreen  from './screens/DistractorSpotterScreen'
 import CohesionDetectorScreen   from './screens/CohesionDetectorScreen'
 import SentenceSorterScreen     from './screens/SentenceSorterScreen'
 import SynonymSnapScreen        from './screens/SynonymSnapScreen'
+import ReadingPassageScreen     from './screens/ReadingPassageScreen'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
@@ -108,6 +109,8 @@ function ScreenRenderer({ screen, onNext }) {
       return <SentenceSorterScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'synonym_snap':
       return <SynonymSnapScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'reading_passage':
+      return <ReadingPassageScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'word_flash':
       return <WordFlashScreen data={screen.data} onNext={(correct, flag) => onNext(correct)} />
     case 'speed_round':

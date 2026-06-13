@@ -368,6 +368,17 @@ export function buildQueue(blocks, mode = 'learn') {
         break
       }
 
+      case 'reading_passage': {
+        queue.push({
+          id: `${block.id}-rp`,
+          type: 'reading_passage',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
       case 'answer_key':
         // Never shown to students
         break
