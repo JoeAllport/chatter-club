@@ -421,7 +421,8 @@ export default function LessonSession() {
   const currentScreen = queue[screenIdx]
 
   return (
-    <div className="fixed inset-0 bg-white flex flex-col">
+    <div className="fixed inset-0 bg-white flex flex-col items-center">
+      <div className="w-full max-w-lg flex flex-col flex-1 min-h-0">
 
       {/* Top bar */}
       <div className="flex items-center gap-4 px-4 py-3 flex-shrink-0 border-b border-gray-100">
@@ -479,6 +480,7 @@ export default function LessonSession() {
           onClose={() => setShowRef(false)}
         />
       )}
+      </div>
     </div>
   )
 }

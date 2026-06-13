@@ -159,6 +159,43 @@ function renderPart6Text(text, answers, onGapClick, submitted) {
 
 // ── Section text component ────────────────────────────────────────────────────
 
+// Renders a raw text string into title + paragraphs
+// First non-empty line becomes the title if it looks like one (no sentence-ending punctuation)
+function renderTextContent(rawText, highlights, sectionIdx) {
+  const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean)
+  if (!lines.length) return null
+
+  // Detect title: first line with no trailing period/question/exclamation
+  const firstLine = lines[0]
+  const isTitle = !/[.!?]$/.test(firstLine) && firstLine.length < 120
+  const titleLine = isTitle ? firstLine : null
+  const bodyLines = isTitle ? lines.slice(1) : lines
+
+  // Group consecutive body lines into paragraphs (blank line = new paragraph)
+  // Since we filtered blank lines, each line is a paragraph chunk — join runs
+  // Actually: split original on \n\n for paragraphs
+  const rawParagraphs = rawText.split(/\n\n+/)
+  const paragraphs = isTitle
+    ? rawParagraphs.slice(1).map(p => p.replace(/\n/g, ' ').trim()).filter(Boolean)
+    : rawParagraphs.map(p => p.replace(/\n/g, ' ').trim()).filter(Boolean)
+
+  return (
+    <>
+      {titleLine && (
+        <h2 className="text-lg font-black text-gray-900 mb-4 leading-snug">{titleLine}</h2>
+      )}
+      {paragraphs.map((para, i) => {
+        const content = applyHighlights(para, highlights, sectionIdx)
+        return (
+          <p key={i} className="text-sm text-gray-700 leading-[1.9] mb-4 last:mb-0">
+            {content}
+          </p>
+        )
+      })}
+    </>
+  )
+}
+
 function SectionText({ section, sectionIdx, part, answers, highlights, activeHighlight,
                        onGapClick, onTextSelect, submitted }) {
   const ref = useRef(null)
@@ -172,21 +209,22 @@ function SectionText({ section, sectionIdx, part, answers, highlights, activeHig
     sel.removeAllRanges()
   }
 
-  const content = part === 6
-    ? renderPart6Text(section.text, answers, onGapClick, submitted)
-    : applyHighlights(section.text, highlights, sectionIdx)
-
   return (
     <div
       ref={ref}
       onMouseUp={handleMouseUp}
       onTouchEnd={handleMouseUp}
-      className="text-sm text-gray-700 leading-[1.85] select-text cursor-text"
+      className="select-text cursor-text"
     >
       {section.heading && (
-        <p className="font-bold text-gray-900 text-base mb-2">{section.heading}</p>
+        <p className="font-black text-gray-900 text-base mb-3">{section.heading}</p>
       )}
-      {content}
+      {part === 6
+        ? <div className="text-sm text-gray-700 leading-[1.9]">
+            {renderPart6Text(section.text, answers, onGapClick, submitted)}
+          </div>
+        : renderTextContent(section.text, highlights, sectionIdx)
+      }
     </div>
   )
 }

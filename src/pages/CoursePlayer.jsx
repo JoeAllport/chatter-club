@@ -625,190 +625,206 @@ function LockedChapter({ reason }) {
   )
 }
 
+// ─── Skill card config ────────────────────────────────────────────────────────
+
+const SKILL_CONFIG = {
+  'Vocabulary':     { colour: 'bg-violet-500',  light: 'bg-violet-50',  text: 'text-violet-700',  border: 'border-violet-200', icon: '📖' },
+  'Use of English': { colour: 'bg-indigo-500',  light: 'bg-indigo-50',  text: 'text-indigo-700',  border: 'border-indigo-200', icon: '✏️' },
+  'Reading':        { colour: 'bg-teal-500',    light: 'bg-teal-50',    text: 'text-teal-700',    border: 'border-teal-200',   icon: '📄' },
+  'Writing':        { colour: 'bg-amber-500',   light: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200',  icon: '🖊️' },
+  'Listening':      { colour: 'bg-rose-500',    light: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200',   icon: '🎧' },
+  'Speaking':       { colour: 'bg-orange-500',  light: 'bg-orange-50',  text: 'text-orange-700',  border: 'border-orange-200', icon: '💬' },
+}
+const DEFAULT_SKILL = { colour: 'bg-gray-400', light: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200', icon: '📚' }
+
 // ─── Course Home ─────────────────────────────────────────────────────────────
 
 function CourseHome({
   course, units, progress, allChapters,
   completedCount, overallPct, lockReason,
-  onStartChapter, onSelectChapter, slug, navigate,
+  onStartChapter, onSelectChapter,
 }) {
-  // Find the next chapter to do: first incomplete, unlocked chapter
+  const [expandedUnit, setExpandedUnit] = useState(null)
+
+  // Find the next chapter: first incomplete, unlocked
   const nextChapter = (() => {
     for (const unit of units) {
       for (const ch of unit.chapters) {
-        if (!progress[ch.id]?.completed && !lockReason(ch, unit)) return ch
+        if (!progress[ch.id]?.completed && !lockReason(ch, unit)) return { ch, unit }
       }
     }
     return null
   })()
 
-  // Stats
-  const totalChapters  = allChapters.length
-  const totalMins      = allChapters.reduce((s, ch) => s + (ch.estimated_mins || 0), 0)
-  const completedMins  = allChapters
-    .filter(ch => progress[ch.id]?.completed)
-    .reduce((s, ch) => s + (ch.estimated_mins || 0), 0)
-
-  const CHAPTER_TYPE_COLOURS = {
-    lesson:        'bg-indigo-50 text-indigo-600 border-indigo-100',
-    exam_practice: 'bg-amber-50 text-amber-600 border-amber-100',
-    review:        'bg-purple-50 text-purple-600 border-purple-100',
-  }
-  const CHAPTER_TYPE_LABELS = {
-    lesson:        'Lesson',
-    exam_practice: 'Exam',
-    review:        'Review',
-  }
-
+  const totalChapters = allChapters.length
   const started = completedCount > 0
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 pb-10">
 
-      {/* Hero */}
-      <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 text-white">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            {course.level && (
-              <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-white/20 text-white mb-3">
-                {course.level}
-              </span>
-            )}
-            <h1 className="text-xl font-black leading-tight mb-2">{course.title}</h1>
-            {course.description && (
-              <p className="text-sm text-indigo-200 leading-relaxed line-clamp-2">{course.description}</p>
-            )}
-          </div>
-        </div>
+      {/* ── Hero ── */}
+      <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-indigo-800 px-6 pt-7 pb-6 text-white">
+        {course.level && (
+          <span className="inline-block text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 mb-3 tracking-wide uppercase">
+            {course.level}
+          </span>
+        )}
+        <h1 className="text-2xl font-black leading-tight mb-1">{course.title}</h1>
+        {course.description && (
+          <p className="text-sm text-indigo-200 leading-relaxed mb-5 max-w-xs">{course.description}</p>
+        )}
 
-        {/* Progress bar */}
-        <div className="mt-5">
-          <div className="flex justify-between text-xs text-indigo-200 mb-1.5">
-            <span>{completedCount} of {totalChapters} chapters complete</span>
+        {/* Progress */}
+        <div className="mb-5">
+          <div className="flex justify-between text-xs text-indigo-300 mb-1.5">
+            <span>{completedCount} of {totalChapters} lessons done</span>
             <span>{overallPct}%</span>
           </div>
-          <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-white rounded-full transition-all duration-700"
-              style={{ width: `${overallPct}%` }}
-            />
+          <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div className="h-full bg-white rounded-full transition-all duration-700" style={{ width: `${overallPct}%` }} />
           </div>
         </div>
 
-        {/* CTA */}
+        {/* Next step CTA */}
         {nextChapter && (
           <button
-            onClick={() => onStartChapter(nextChapter.id)}
-            className="mt-5 w-full py-3.5 bg-white text-indigo-700 font-bold rounded-2xl text-sm hover:bg-indigo-50 active:scale-95 transition-all"
+            onClick={() => onStartChapter(nextChapter.ch.id)}
+            className="w-full py-3.5 bg-white text-indigo-700 font-bold rounded-2xl text-sm hover:bg-indigo-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
-            {started ? `Continue → ${nextChapter.title}` : `Start course → ${nextChapter.title}`}
+            <span>{started ? 'Continue' : 'Start'}</span>
+            <span className="opacity-60">→</span>
+            <span className="truncate max-w-[180px]">{nextChapter.ch.title}</span>
+            {nextChapter.ch.estimated_mins && (
+              <span className="text-indigo-400 text-xs font-normal flex-shrink-0">
+                {nextChapter.ch.estimated_mins}m
+              </span>
+            )}
           </button>
         )}
-        {!nextChapter && completedCount === totalChapters && totalChapters > 0 && (
-          <div className="mt-5 w-full py-3.5 bg-white/20 text-white font-bold rounded-2xl text-sm text-center">
-            🎉 Course complete!
+        {!nextChapter && totalChapters > 0 && (
+          <div className="w-full py-3.5 bg-white/20 text-white font-bold rounded-2xl text-sm text-center">
+            🎉 All lessons complete!
           </div>
         )}
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: 'Chapters', value: totalChapters, icon: '📚' },
-          { label: 'Done',     value: completedCount, icon: '✓', highlight: completedCount > 0 },
-          { label: 'Minutes',  value: totalMins,      icon: '⏱' },
-        ].map(({ label, value, icon, highlight }) => (
-          <div key={label} className={cn(
-            'rounded-2xl border p-3 text-center',
-            highlight ? 'border-green-200 bg-green-50' : 'border-gray-100 bg-gray-50'
-          )}>
-            <p className="text-base mb-0.5">{icon}</p>
-            <p className={cn('text-xl font-black', highlight ? 'text-green-700' : 'text-gray-800')}>{value}</p>
-            <p className="text-xs text-gray-400">{label}</p>
-          </div>
-        ))}
-      </div>
+      {/* ── Skill cards ── */}
+      <div className="space-y-4">
+        {units.map((unit) => {
+          const skill   = SKILL_CONFIG[unit.title] || DEFAULT_SKILL
+          const done    = unit.chapters.filter(ch => progress[ch.id]?.completed).length
+          const total   = unit.chapters.length
+          const isOpen  = expandedUnit === unit.id
 
-      {/* Unit + chapter list */}
-      <div className="space-y-6">
-        {units.map((unit, ui) => (
-          <div key={unit.id}>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-1">
-              {unit.title}
-            </p>
-            <div className="space-y-2">
-              {unit.chapters.map((ch, ci) => {
-                const done    = progress[ch.id]?.completed
-                const locked  = lockReason(ch, unit)
-                const isNext  = ch.id === nextChapter?.id
-                const typeKey = ch.chapter_type || 'lesson'
+          // Find next chapter in this unit
+          const unitNext = unit.chapters.find(ch =>
+            !progress[ch.id]?.completed && !lockReason(ch, unit)
+          )
 
-                return (
-                  <button
-                    key={ch.id}
-                    onClick={() => locked ? null : onSelectChapter(ch.id)}
-                    disabled={!!locked}
-                    className={cn(
-                      'w-full text-left flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 transition-all',
-                      locked
-                        ? 'border-gray-100 bg-gray-50 opacity-50 cursor-default'
-                        : isNext
-                          ? 'border-indigo-300 bg-indigo-50 hover:bg-indigo-100'
-                          : done
-                            ? 'border-green-200 bg-green-50 hover:bg-green-100'
-                            : 'border-gray-200 bg-white hover:border-indigo-200 hover:bg-indigo-50/40'
-                    )}
-                  >
-                    {/* Status icon */}
-                    <div className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0',
-                      locked
-                        ? 'bg-gray-200 text-gray-400'
-                        : done
-                          ? 'bg-green-500 text-white'
-                          : isNext
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-gray-100 text-gray-500'
-                    )}>
-                      {locked ? '🔒' : done ? '✓' : `${ui + 1}.${ci + 1}`}
+          return (
+            <div key={unit.id} className={cn('rounded-2xl border overflow-hidden transition-all', skill.border)}>
+
+              {/* Card header — tap to expand/collapse */}
+              <button
+                onClick={() => setExpandedUnit(isOpen ? null : unit.id)}
+                className={cn('w-full flex items-center gap-4 px-5 py-4 text-left', skill.light)}
+              >
+                {/* Icon + colour stripe */}
+                <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0', skill.colour)}>
+                  {skill.icon}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className={cn('font-black text-base leading-tight', skill.text)}>{unit.title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {done === total && total > 0
+                      ? '✓ All done'
+                      : `${done}/${total} complete`}
+                    {unitNext && ` · Next: ${unitNext.title}`}
+                  </p>
+                </div>
+
+                {/* Progress pill */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {total > 0 && (
+                    <div className="w-16 h-1.5 bg-white/60 rounded-full overflow-hidden border border-white/40">
+                      <div
+                        className={cn('h-full rounded-full transition-all', skill.colour)}
+                        style={{ width: `${Math.round((done / total) * 100)}%` }}
+                      />
                     </div>
+                  )}
+                  <span className={cn('text-xs transition-transform duration-200', isOpen ? 'rotate-180' : '', skill.text)}>
+                    ▾
+                  </span>
+                </div>
+              </button>
 
-                    {/* Chapter info */}
-                    <div className="flex-1 min-w-0">
-                      <p className={cn(
-                        'text-sm font-semibold leading-tight truncate',
-                        locked ? 'text-gray-400' : done ? 'text-green-800' : isNext ? 'text-indigo-900' : 'text-gray-800'
-                      )}>
-                        {ch.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className={cn(
-                          'text-xs px-1.5 py-0.5 rounded font-medium border',
-                          CHAPTER_TYPE_COLOURS[typeKey] || 'bg-gray-100 text-gray-500 border-gray-100'
-                        )}>
-                          {CHAPTER_TYPE_LABELS[typeKey] || typeKey}
-                        </span>
-                        {ch.estimated_mins && (
-                          <span className="text-xs text-gray-400">{ch.estimated_mins} min</span>
+              {/* Chapter list — shown when expanded */}
+              {isOpen && (
+                <div className="bg-white divide-y divide-gray-50">
+                  {unit.chapters.map((ch, ci) => {
+                    const chDone   = progress[ch.id]?.completed
+                    const chLocked = lockReason(ch, unit)
+                    const isNext   = ch.id === unitNext?.id
+
+                    return (
+                      <button
+                        key={ch.id}
+                        onClick={() => !chLocked && onSelectChapter(ch.id)}
+                        disabled={!!chLocked}
+                        className={cn(
+                          'w-full text-left flex items-center gap-3 px-5 py-3 transition-colors',
+                          chLocked
+                            ? 'opacity-40 cursor-default'
+                            : isNext
+                              ? cn(skill.light, 'hover:opacity-90')
+                              : 'hover:bg-gray-50'
                         )}
-                      </div>
-                    </div>
+                      >
+                        {/* Status dot */}
+                        <div className={cn(
+                          'w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0',
+                          chLocked ? 'bg-gray-200 text-gray-400'
+                          : chDone  ? 'bg-green-500 text-white'
+                          : isNext  ? cn(skill.colour, 'text-white')
+                          : 'bg-gray-100 text-gray-400'
+                        )}>
+                          {chLocked ? '🔒' : chDone ? '✓' : ci + 1}
+                        </div>
 
-                    {/* Right side */}
-                    {!locked && (
-                      <span className={cn(
-                        'text-xs font-semibold flex-shrink-0',
-                        done ? 'text-green-600' : isNext ? 'text-indigo-600' : 'text-gray-300'
-                      )}>
-                        {done ? 'Review' : isNext ? 'Start →' : '→'}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
+                        <div className="flex-1 min-w-0">
+                          <p className={cn(
+                            'text-sm leading-snug',
+                            chDone  ? 'text-gray-400 line-through decoration-gray-300'
+                            : isNext ? cn('font-semibold', skill.text)
+                            : 'text-gray-700'
+                          )}>
+                            {ch.title}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {ch.estimated_mins && (
+                            <span className="text-xs text-gray-300">{ch.estimated_mins}m</span>
+                          )}
+                          {!chLocked && (
+                            <span className={cn(
+                              'text-xs',
+                              chDone ? 'text-gray-300' : isNext ? skill.text : 'text-gray-300'
+                            )}>
+                              {chDone ? '↩' : '→'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
