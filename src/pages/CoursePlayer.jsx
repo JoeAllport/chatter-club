@@ -625,6 +625,195 @@ function LockedChapter({ reason }) {
   )
 }
 
+// ─── Course Home ─────────────────────────────────────────────────────────────
+
+function CourseHome({
+  course, units, progress, allChapters,
+  completedCount, overallPct, lockReason,
+  onStartChapter, onSelectChapter, slug, navigate,
+}) {
+  // Find the next chapter to do: first incomplete, unlocked chapter
+  const nextChapter = (() => {
+    for (const unit of units) {
+      for (const ch of unit.chapters) {
+        if (!progress[ch.id]?.completed && !lockReason(ch, unit)) return ch
+      }
+    }
+    return null
+  })()
+
+  // Stats
+  const totalChapters  = allChapters.length
+  const totalMins      = allChapters.reduce((s, ch) => s + (ch.estimated_mins || 0), 0)
+  const completedMins  = allChapters
+    .filter(ch => progress[ch.id]?.completed)
+    .reduce((s, ch) => s + (ch.estimated_mins || 0), 0)
+
+  const CHAPTER_TYPE_COLOURS = {
+    lesson:        'bg-indigo-50 text-indigo-600 border-indigo-100',
+    exam_practice: 'bg-amber-50 text-amber-600 border-amber-100',
+    review:        'bg-purple-50 text-purple-600 border-purple-100',
+  }
+  const CHAPTER_TYPE_LABELS = {
+    lesson:        'Lesson',
+    exam_practice: 'Exam',
+    review:        'Review',
+  }
+
+  const started = completedCount > 0
+
+  return (
+    <div className="space-y-8">
+
+      {/* Hero */}
+      <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 text-white">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            {course.level && (
+              <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-white/20 text-white mb-3">
+                {course.level}
+              </span>
+            )}
+            <h1 className="text-xl font-black leading-tight mb-2">{course.title}</h1>
+            {course.description && (
+              <p className="text-sm text-indigo-200 leading-relaxed line-clamp-2">{course.description}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="mt-5">
+          <div className="flex justify-between text-xs text-indigo-200 mb-1.5">
+            <span>{completedCount} of {totalChapters} chapters complete</span>
+            <span>{overallPct}%</span>
+          </div>
+          <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white rounded-full transition-all duration-700"
+              style={{ width: `${overallPct}%` }}
+            />
+          </div>
+        </div>
+
+        {/* CTA */}
+        {nextChapter && (
+          <button
+            onClick={() => onStartChapter(nextChapter.id)}
+            className="mt-5 w-full py-3.5 bg-white text-indigo-700 font-bold rounded-2xl text-sm hover:bg-indigo-50 active:scale-95 transition-all"
+          >
+            {started ? `Continue → ${nextChapter.title}` : `Start course → ${nextChapter.title}`}
+          </button>
+        )}
+        {!nextChapter && completedCount === totalChapters && totalChapters > 0 && (
+          <div className="mt-5 w-full py-3.5 bg-white/20 text-white font-bold rounded-2xl text-sm text-center">
+            🎉 Course complete!
+          </div>
+        )}
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Chapters', value: totalChapters, icon: '📚' },
+          { label: 'Done',     value: completedCount, icon: '✓', highlight: completedCount > 0 },
+          { label: 'Minutes',  value: totalMins,      icon: '⏱' },
+        ].map(({ label, value, icon, highlight }) => (
+          <div key={label} className={cn(
+            'rounded-2xl border p-3 text-center',
+            highlight ? 'border-green-200 bg-green-50' : 'border-gray-100 bg-gray-50'
+          )}>
+            <p className="text-base mb-0.5">{icon}</p>
+            <p className={cn('text-xl font-black', highlight ? 'text-green-700' : 'text-gray-800')}>{value}</p>
+            <p className="text-xs text-gray-400">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Unit + chapter list */}
+      <div className="space-y-6">
+        {units.map((unit, ui) => (
+          <div key={unit.id}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-1">
+              {unit.title}
+            </p>
+            <div className="space-y-2">
+              {unit.chapters.map((ch, ci) => {
+                const done    = progress[ch.id]?.completed
+                const locked  = lockReason(ch, unit)
+                const isNext  = ch.id === nextChapter?.id
+                const typeKey = ch.chapter_type || 'lesson'
+
+                return (
+                  <button
+                    key={ch.id}
+                    onClick={() => locked ? null : onSelectChapter(ch.id)}
+                    disabled={!!locked}
+                    className={cn(
+                      'w-full text-left flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 transition-all',
+                      locked
+                        ? 'border-gray-100 bg-gray-50 opacity-50 cursor-default'
+                        : isNext
+                          ? 'border-indigo-300 bg-indigo-50 hover:bg-indigo-100'
+                          : done
+                            ? 'border-green-200 bg-green-50 hover:bg-green-100'
+                            : 'border-gray-200 bg-white hover:border-indigo-200 hover:bg-indigo-50/40'
+                    )}
+                  >
+                    {/* Status icon */}
+                    <div className={cn(
+                      'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0',
+                      locked
+                        ? 'bg-gray-200 text-gray-400'
+                        : done
+                          ? 'bg-green-500 text-white'
+                          : isNext
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-gray-100 text-gray-500'
+                    )}>
+                      {locked ? '🔒' : done ? '✓' : `${ui + 1}.${ci + 1}`}
+                    </div>
+
+                    {/* Chapter info */}
+                    <div className="flex-1 min-w-0">
+                      <p className={cn(
+                        'text-sm font-semibold leading-tight truncate',
+                        locked ? 'text-gray-400' : done ? 'text-green-800' : isNext ? 'text-indigo-900' : 'text-gray-800'
+                      )}>
+                        {ch.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={cn(
+                          'text-xs px-1.5 py-0.5 rounded font-medium border',
+                          CHAPTER_TYPE_COLOURS[typeKey] || 'bg-gray-100 text-gray-500 border-gray-100'
+                        )}>
+                          {CHAPTER_TYPE_LABELS[typeKey] || typeKey}
+                        </span>
+                        {ch.estimated_mins && (
+                          <span className="text-xs text-gray-400">{ch.estimated_mins} min</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right side */}
+                    {!locked && (
+                      <span className={cn(
+                        'text-xs font-semibold flex-shrink-0',
+                        done ? 'text-green-600' : isNext ? 'text-indigo-600' : 'text-gray-300'
+                      )}>
+                        {done ? 'Review' : isNext ? 'Start →' : '→'}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main CoursePlayer ────────────────────────────────────────────────────────
 
 export default function CoursePlayer() {
@@ -706,8 +895,8 @@ export default function CoursePlayer() {
         setProgress(progMap)
       }
 
-      const firstChapter = chapterData?.[0]
-      if (firstChapter) setActiveChapterId(firstChapter.id)
+      // Don't auto-select first chapter — show course home first
+      setActiveChapterId(null)
 
       setLoading(false)
     }
@@ -1007,14 +1196,34 @@ export default function CoursePlayer() {
           {/* Content area */}
           <main className="min-h-[60vh]">
             {!activeChapter ? (
-              <div className="py-20 text-center text-gray-400">
-                <p>Select a chapter to begin.</p>
-              </div>
+              <CourseHome
+                course={course}
+                units={units}
+                progress={progress}
+                allChapters={allChapters}
+                completedCount={completedCount}
+                overallPct={overallPct}
+                lockReason={lockReason}
+                onStartChapter={(chId) => {
+                  setActiveChapterId(chId)
+                  navigate(`/courses/${slug}/chapters/${chId}`)
+                }}
+                onSelectChapter={(chId) => setActiveChapterId(chId)}
+                slug={slug}
+                navigate={navigate}
+              />
             ) : (
               <div className="space-y-6">
                 {/* Chapter header */}
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={() => setActiveChapterId(null)}
+                      className="text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors"
+                    >
+                      ← Overview
+                    </button>
+                    <span className="text-gray-200">·</span>
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                       {activeUnit?.title}
                     </p>
@@ -1045,7 +1254,7 @@ export default function CoursePlayer() {
                       onClick={() => navigate(`/courses/${slug}/chapters/${activeChapterId}`)}
                       className="px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl text-base hover:bg-indigo-700 active:scale-95 transition-all shadow-sm"
                     >
-                      {alreadyComplete ? 'Review lesson →' : 'Start lesson →'}
+                      {alreadyComplete ? '↩ Review lesson' : 'Start lesson →'}
                     </button>
                     {alreadyComplete && (
                       <p className="text-xs text-gray-400">You've completed this chapter. Start again to review.</p>
