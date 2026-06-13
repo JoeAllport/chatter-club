@@ -201,7 +201,58 @@ export function buildQueue(blocks, mode = 'learn') {
         break
 
       case 'vocabulary': {
-        // Each vocab item becomes a word_flash screen
+        // 3-step teaching sequence: definition match → translation match → speed round
+        // This replaces the old word_flash-per-item approach with active retrieval.
+        const rawItems = block.content?.items || block.content?.vocab_items || []
+        const vocabItems = rawItems.map(item => ({
+          word:        item.word,
+          pos:         item.pos || item.part_of_speech || null,
+          definition:  item.definition,
+          example:     item.example || null,
+          translation: item.translation || null,
+          distractors: item.distractors || null,
+          collocations: item.collocations || null,
+          wordFamily:  item.wordFamily || item.word_family || null,
+        }))
+
+        if (vocabItems.length === 0) break
+
+        // Step 1: definition match (all items in one screen)
+        queue.push({
+          id: `${block.id}-defmatch`,
+          type: 'definition_match',
+          blockId: block.id,
+          isScored: true,
+          data: { items: vocabItems },
+        })
+
+        // Step 2: translation match (only if any items have translations)
+        const hasTranslations = vocabItems.some(it => it.translation)
+        if (hasTranslations) {
+          queue.push({
+            id: `${block.id}-transmatch`,
+            type: 'translation_match',
+            blockId: block.id,
+            isScored: true,
+            data: { items: vocabItems },
+          })
+        }
+
+        // Step 3: speed round (MCQ consolidation)
+        queue.push({
+          id: `${block.id}-speed`,
+          type: 'speed_round',
+          blockId: block.id,
+          isScored: true,
+          data: { items: vocabItems, mode: 'word_to_def' },
+        })
+
+        break
+      }
+
+      case 'word_flash': {
+        // Explicit word_flash blocks still emit per-item flash cards
+        // (used for first-exposure intro before definition matching)
         const items = block.content?.items || block.content?.vocab_items || []
         items.forEach((item, i) => {
           queue.push({

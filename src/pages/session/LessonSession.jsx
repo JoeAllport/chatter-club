@@ -42,6 +42,8 @@ import CohesionDetectorScreen   from './screens/CohesionDetectorScreen'
 import SentenceSorterScreen     from './screens/SentenceSorterScreen'
 import SynonymSnapScreen        from './screens/SynonymSnapScreen'
 import ReadingPassageScreen     from './screens/ReadingPassageScreen'
+import DefinitionMatchScreen    from './screens/DefinitionMatchScreen'
+import TranslationMatchScreen   from './screens/TranslationMatchScreen'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
@@ -113,6 +115,10 @@ function ScreenRenderer({ screen, onNext }) {
       return <ReadingPassageScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'word_flash':
       return <WordFlashScreen data={screen.data} onNext={(correct, flag) => onNext(correct)} />
+    case 'definition_match':
+      return <DefinitionMatchScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'translation_match':
+      return <TranslationMatchScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'speed_round':
       return <SpeedRoundScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'memory_pairs':
