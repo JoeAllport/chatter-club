@@ -30,6 +30,7 @@ import CompletionScreen from './screens/CompletionScreen'
 import WordFlashScreen   from './screens/WordFlashScreen'
 import SpeedRoundScreen  from './screens/SpeedRoundScreen'
 import MemoryPairsScreen from './screens/MemoryPairsScreen'
+import PassageScreen     from './screens/PassageScreen'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
@@ -74,6 +75,8 @@ function ScreenRenderer({ screen, onNext }) {
       return <TransformScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'match_pair':
       return <MatchScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'passage':
+      return <PassageScreen data={screen.data} onNext={() => onNext(null)} />
     case 'word_flash':
       return <WordFlashScreen data={screen.data} onNext={(correct, flag) => onNext(correct)} />
     case 'speed_round':

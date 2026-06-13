@@ -52,14 +52,28 @@ export function buildQueue(blocks, mode = 'learn') {
         break
 
       case 'open_cloze': {
-        // Split into individual gap screens for one-at-a-time feel
         const { passage, answers } = block.content
         const parts = (passage || '').split(/\(\d+\)\s*___+/)
+
+        // Show full passage first as a read-only screen
+        queue.push({
+          id: `${block.id}-passage`,
+          type: 'passage',
+          blockId: block.id,
+          isScored: false,
+          data: {
+            passage,
+            gapStyle: 'numbered',
+            totalGaps: answers?.length || 0,
+            title: 'Open Cloze',
+            instruction: 'Read the whole text carefully. Then fill in each gap one at a time.',
+          },
+        })
+
+        // One screen per gap
         answers?.forEach((answer, i) => {
-          // Extract the sentence context around this gap
           const before = parts[i] || ''
           const after = parts[i + 1] || ''
-          // Take last sentence fragment before gap + first sentence fragment after
           const contextBefore = before.split(/[.!?]\s+/).pop() || before
           const contextAfter = after.split(/[.!?]\s+/)[0] || after
           queue.push({
@@ -73,7 +87,6 @@ export function buildQueue(blocks, mode = 'learn') {
               contextBefore: contextBefore.trim(),
               contextAfter: contextAfter.trim(),
               answer,
-              passageIntro: i === 0 ? passage : null, // show full passage on first gap
             },
           })
         })
@@ -123,9 +136,28 @@ export function buildQueue(blocks, mode = 'learn') {
       }
 
       case 'gap_fill': {
-        // Gap fill becomes individual cloze items (same as open_cloze)
-        const { passage, answers, bank } = block.content
+        const { passage, answers, bank, useBank } = block.content
+        const hasBank = useBank || (bank && bank.length > 0)
         const parts = (passage || '').split('___')
+
+        // Show full passage first — always for typed fills, always for word-bank too
+        // (students need to see the whole text to choose from the bank intelligently)
+        queue.push({
+          id: `${block.id}-passage`,
+          type: 'passage',
+          blockId: block.id,
+          isScored: false,
+          data: {
+            passage,
+            gapStyle: 'blank',
+            totalGaps: answers?.length || 0,
+            title: hasBank ? 'Gap Fill' : 'Gap Fill',
+            instruction: hasBank
+              ? 'Read the text. Then fill each gap using the words in the box.'
+              : 'Read the text carefully. Then fill in each gap.',
+          },
+        })
+
         answers?.forEach((answer, i) => {
           const contextBefore = (parts[i] || '').split(/[.!?\n]\s+/).pop() || ''
           const contextAfter = (parts[i + 1] || '').split(/[.!?\n]/)[0] || ''
@@ -141,8 +173,7 @@ export function buildQueue(blocks, mode = 'learn') {
               contextAfter: contextAfter.trim(),
               answer,
               bank: bank || [],
-              useBank: true,
-              passageIntro: i === 0 ? passage : null,
+              useBank: hasBank,
             },
           })
         })
