@@ -258,6 +258,17 @@ export function buildQueue(blocks, mode = 'learn') {
         break
       }
 
+      case 'collocation_snap': {
+        queue.push({
+          id: `${block.id}-snap`,
+          type: 'collocation_snap',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
       case 'answer_key':
         // Never shown to students
         break
