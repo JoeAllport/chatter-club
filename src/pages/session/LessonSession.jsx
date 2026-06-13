@@ -33,7 +33,8 @@ import MemoryPairsScreen from './screens/MemoryPairsScreen'
 import PassageScreen     from './screens/PassageScreen'
 import PrepSprintScreen       from './screens/PrepSprintScreen'
 import CollocationSnapScreen  from './screens/CollocationSnapScreen'
-import WordFamilyScreen       from './screens/WordFamilyScreen'
+import WordFamilyScreen          from './screens/WordFamilyScreen'
+import TransformAnalyserScreen  from './screens/TransformAnalyserScreen'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
@@ -86,6 +87,8 @@ function ScreenRenderer({ screen, onNext }) {
       return <CollocationSnapScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'word_family':
       return <WordFamilyScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'transform_analyser':
+      return <TransformAnalyserScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'word_flash':
       return <WordFlashScreen data={screen.data} onNext={(correct, flag) => onNext(correct)} />
     case 'speed_round':

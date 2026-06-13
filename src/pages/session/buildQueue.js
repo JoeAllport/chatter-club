@@ -280,6 +280,17 @@ export function buildQueue(blocks, mode = 'learn') {
         break
       }
 
+      case 'transform_analyser': {
+        queue.push({
+          id: `${block.id}-ta`,
+          type: 'transform_analyser',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
       case 'answer_key':
         // Never shown to students
         break
