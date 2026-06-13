@@ -335,6 +335,39 @@ export function buildQueue(blocks, mode = 'learn') {
         break
       }
 
+      case 'cohesion_detector': {
+        queue.push({
+          id: `${block.id}-cd`,
+          type: 'cohesion_detector',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
+      case 'sentence_sorter': {
+        queue.push({
+          id: `${block.id}-ss`,
+          type: 'sentence_sorter',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
+      case 'synonym_snap': {
+        queue.push({
+          id: `${block.id}-syn`,
+          type: 'synonym_snap',
+          blockId: block.id,
+          isScored: true,
+          data: block.content,
+        })
+        break
+      }
+
       case 'answer_key':
         // Never shown to students
         break

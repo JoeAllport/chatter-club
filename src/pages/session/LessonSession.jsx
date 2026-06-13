@@ -38,6 +38,9 @@ import TransformAnalyserScreen  from './screens/TransformAnalyserScreen'
 import PronounTrackerScreen     from './screens/PronounTrackerScreen'
 import TrueMatchScreen          from './screens/TrueMatchScreen'
 import DistractorSpotterScreen  from './screens/DistractorSpotterScreen'
+import CohesionDetectorScreen   from './screens/CohesionDetectorScreen'
+import SentenceSorterScreen     from './screens/SentenceSorterScreen'
+import SynonymSnapScreen        from './screens/SynonymSnapScreen'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
@@ -99,6 +102,12 @@ function ScreenRenderer({ screen, onNext }) {
     case 'distractor_spotter':
     case 'highlight_task':
       return <DistractorSpotterScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'cohesion_detector':
+      return <CohesionDetectorScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'sentence_sorter':
+      return <SentenceSorterScreen data={screen.data} onNext={(correct) => onNext(correct)} />
+    case 'synonym_snap':
+      return <SynonymSnapScreen data={screen.data} onNext={(correct) => onNext(correct)} />
     case 'word_flash':
       return <WordFlashScreen data={screen.data} onNext={(correct, flag) => onNext(correct)} />
     case 'speed_round':
