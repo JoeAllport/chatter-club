@@ -128,7 +128,9 @@ function CourseCard({ course, progress }) {
   )
 }
 
-export default function CourseList() {
+// filterCategory: 'exam-prep' | 'life-english' | null (all)
+// minimal: true = no PageMeta + no header (for use inside CoursesHome)
+export default function CourseList({ filterCategory = null, minimal = false }) {
   const [courses, setCourses]     = useState([])
   const [progress, setProgress]   = useState({})  // course_id → { pct }
   const [loading, setLoading]     = useState(true)
@@ -193,6 +195,10 @@ export default function CourseList() {
   }, [])
 
   const displayed = courses.filter(c => {
+    // Category filter (from CoursesHome)
+    if (filterCategory === 'exam-prep'    && !c.topic_tags?.includes('exam-prep'))    return false
+    if (filterCategory === 'life-english' && !c.topic_tags?.includes('life-english')) return false
+    // Local filter chips
     if (filter === 'free')        return c.is_free
     if (filter === 'in-progress') return (progress[c.id]?.pct ?? 0) > 0 && progress[c.id]?.pct < 100
     return true
@@ -200,20 +206,24 @@ export default function CourseList() {
 
   return (
     <>
-      <PageMeta
-        title="Courses — Learn English"
-        description="Self-paced English courses built around real language. Pick your level, start today."
-        canonical="/courses"
-      />
+      {!minimal && (
+        <PageMeta
+          title="Courses — Learn English"
+          description="Self-paced English courses built around real language. Pick your level, start today."
+          canonical="/courses"
+        />
+      )}
 
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-        {/* Header */}
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-gray-900">Courses</h1>
-          <p className="text-gray-500 text-sm">
-            Work through a structured course at your own pace.
-          </p>
-        </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Header — only in standalone mode */}
+        {!minimal && (
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-gray-900">Courses</h1>
+            <p className="text-gray-500 text-sm">
+              Work through a structured course at your own pace.
+            </p>
+          </div>
+        )}
 
         {/* Filter chips */}
         <div className="flex gap-2 flex-wrap">

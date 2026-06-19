@@ -1,5 +1,256 @@
 @import "tailwindcss";
 
+/* ════════════════════════════════════════════════════════════════════════════
+   CHATTER CLUB — DESIGN SYSTEM
+   ════════════════════════════════════════════════════════════════════════════
+
+   COLOUR PALETTE
+   ──────────────
+   pink        #ffb1c1   Hub section accent
+   red         #f76639   Incorrect / error / danger — also Exam third colour
+   yellow      #f4bb59   Podcast accent / Business secondary
+   green       #72c09e   BRAND PRIMARY · Correct · Courses accent · Business primary
+   purple      #c2bdf5   Puzzles accent
+   light-blue  #63c7ec   Exam secondary
+   dark-blue   #4b7fc1   Exam primary
+   canvas      #fffbf5   Global page background (warm off-white — not clinical)
+
+   FONT SYSTEM
+   ───────────
+   League Spartan    — headings, UI, nav, buttons, labels, exercise questions
+   Libre Baskerville — article body text only (long-form L2 reading)
+
+   SECTION ACCENTS
+   ───────────────
+   Chatter Club hub  → pink
+   Exam Centre       → dark-blue + light-blue
+   Courses           → green
+   Puzzles           → purple
+   Podcast           → yellow
+   Daily challenge   → yellow (warm, motivating)
+   Correct feedback  → green (always, everywhere)
+   Incorrect feedback → red (always, everywhere)
+   Business / B2B    → green primary, yellow secondary, red third
+
+   TYPOGRAPHY RATIONALE (pedagogical)
+   ────────────────────────────────────
+   Line height 1.7 body / 1.75 article — L2 readers need more interline space
+     than native readers. Research (Dyson & Haselgrove) shows ~1.5–1.8 is the
+     sweet spot for comprehension in adult learners.
+   Line length max-ch-70 — 60–70 characters per line is the accepted optimal
+     range (Baymard, 2012; Bringhurst). Too wide = harder to track, too narrow
+     = too many interruptions.
+   Letter-spacing — League Spartan is geometrically tight at small sizes.
+     A tiny positive tracking (0.01em) at body sizes opens it up without
+     looking artificially spaced. At headings we tighten slightly (-0.01em)
+     for better visual density.
+   Font size — 16px minimum UI, 18px article body. Larger than most apps but
+     appropriate for language learning where students are *studying* each word.
+   Paragraph spacing — 1em between paragraphs. Clear visual chunking aids
+     reading comprehension more than run-on text blocks.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tailwind theme tokens ───────────────────────────────────────────────── */
+@theme {
+
+  /* Palette */
+  --color-pink:        #ffb1c1;
+  --color-pink-light:  #fff0f3;
+  --color-pink-dark:   #e8869a;
+
+  --color-red:         #f76639;
+  --color-red-light:   #fff1ed;
+  --color-red-dark:    #d94e24;
+
+  --color-yellow:      #f4bb59;
+  --color-yellow-light: #fffbee;
+  --color-yellow-dark: #d9a030;
+
+  --color-green:       #72c09e;
+  --color-green-light: #edf8f3;
+  --color-green-dark:  #4ea07c;
+
+  --color-purple:      #c2bdf5;
+  --color-purple-light: #f4f3ff;
+  --color-purple-dark: #8f88d9;
+
+  --color-blue-light:  #63c7ec;
+  --color-blue-light-bg: #edf8fd;
+  --color-blue-light-dark: #3aa8cf;
+
+  --color-blue-dark:   #4b7fc1;
+  --color-blue-dark-bg: #eef3fb;
+  --color-blue-dark-deep: #2f5a96;
+
+  --color-canvas:      #fffbf5;
+
+  /* Brand — green is the global primary */
+  --color-brand:       #72c09e;
+  --color-brand-dark:  #4ea07c;
+  --color-brand-light: #edf8f3;
+
+  /* Correct / incorrect — global, non-negotiable */
+  --color-correct:     #72c09e;
+  --color-correct-bg:  #edf8f3;
+  --color-incorrect:   #f76639;
+  --color-incorrect-bg: #fff1ed;
+
+  /* Fonts */
+  --font-ui:      'League Spartan', system-ui, sans-serif;
+  --font-reading: 'Libre Baskerville', Georgia, serif;
+}
+
+/* ── Base layer ──────────────────────────────────────────────────────────── */
+@layer base {
+
+  /* Page background — warm canvas, not stark white */
+  html {
+    background-color: #fffbf5;
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-size: 16px;
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #fffbf5;
+  }
+
+  /* Heading scale — League Spartan, tight tracking at large sizes */
+  h1 {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  h2 {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+
+  h3, h4, h5, h6 {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  /* Body copy — League Spartan with slightly open tracking */
+  p, li, label, input, textarea, button, select {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+  }
+
+  /* Links */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* ── Article reading surface ─────────────────────────────────────────────── */
+/*
+   Applied with class="article-body" on the article container.
+   Libre Baskerville at 18px / 1.75 line-height.
+   Max width ~68ch — keeps lines in the 60-70 char sweet spot.
+   Paragraph spacing 1em. Generous margins between headings and lists.
+*/
+.article-body {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.75;
+  letter-spacing: 0.005em;   /* very slight — serif reads well naturally */
+  color: #1a1a1a;
+  max-width: 68ch;
+}
+
+.article-body p {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.75;
+  letter-spacing: 0.005em;
+  margin-bottom: 1em;
+}
+
+.article-body h2 {
+  font-family: 'League Spartan', system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-top: 1.75em;
+  margin-bottom: 0.5em;
+}
+
+.article-body ul, .article-body ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.article-body li {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.7;
+  letter-spacing: 0.005em;
+  margin-bottom: 0.4em;
+}
+
+.article-body strong {
+  font-weight: 700;
+}
+
+.article-body em {
+  font-style: italic;
+}
+
+/* ── Exercise / question text ────────────────────────────────────────────── */
+/*
+   Applied with class="exercise-text" on MCQ, gap fill, etc.
+   League Spartan at 17px — slightly larger than standard UI text.
+   Looser line height than article — students read each line as a unit.
+*/
+.exercise-text {
+  font-family: 'League Spartan', system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  color: #1a1a1a;
+}
+
+/* ── Section colour utilities ────────────────────────────────────────────── */
+/* Used as data-section="hub|exam|courses|puzzles|podcast" on layout wrappers */
+
+[data-section="hub"]     { --section-accent: #ffb1c1; --section-accent-bg: #fff0f3; --section-accent-dark: #e8869a; }
+[data-section="exam"]    { --section-accent: #4b7fc1; --section-accent-bg: #eef3fb; --section-accent-dark: #2f5a96; }
+[data-section="courses"] { --section-accent: #72c09e; --section-accent-bg: #edf8f3; --section-accent-dark: #4ea07c; }
+[data-section="puzzles"] { --section-accent: #c2bdf5; --section-accent-bg: #f4f3ff; --section-accent-dark: #8f88d9; }
+[data-section="podcast"] { --section-accent: #f4bb59; --section-accent-bg: #fffbee; --section-accent-dark: #d9a030; }
+
+/* ── Feedback colours — global, always consistent ────────────────────────── */
+.feedback-correct {
+  background-color: #edf8f3;
+  border-color: #72c09e;
+  color: #2d7a55;
+}
+
+.feedback-incorrect {
+  background-color: #fff1ed;
+  border-color: #f76639;
+  color: #b83a1a;
+}
+
+/* ── Utility classes ─────────────────────────────────────────────────────── */
+
+/* Hide scrollbar — used on second navs and tab strips */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Shake animation — used on wrong answer feedback */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%       { transform: translateX(-6px); }
@@ -7,7 +258,15 @@
   60%       { transform: translateX(-4px); }
   80%       { transform: translateX(4px); }
 }
-
 .animate-shake {
   animation: shake 0.5s ease-in-out;
+}
+
+/* Typing cursor — used in animated conversation on home page */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 0.8s ease-in-out infinite;
 }

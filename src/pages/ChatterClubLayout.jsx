@@ -1,163 +1,180 @@
-import { useEffect, useState } from 'react'
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+// ChatterClubLayout.jsx — Hub shell (/home, /articles, /podcasts, /puzzles, /challenge, /words)
+// Includes: TopNav (all sections) + hub second nav + persistent banner + hub footer
+
+import { Link, Outlet, useLocation } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+import TopNav from '../components/TopNav'
+
+const HUB_LINKS = [
+  { to: '/home',      label: 'Home',      match: p => p === '/home' },
+  { to: '/articles',  label: 'Articles',  match: p => p === '/articles' || p.startsWith('/articles/') },
+  { to: '/podcasts',  label: 'Podcasts',  match: p => p === '/podcasts' || p.startsWith('/podcasts/') },
+  { to: '/puzzles',   label: 'Puzzles',   match: p => p === '/puzzles'  || p.startsWith('/puzzles/') },
+  { to: '/challenge', label: 'Challenge', match: p => p === '/challenge' },
+  { to: '/words',     label: 'Word Bank', match: p => p === '/words' },
+]
 
 export default function ChatterClubLayout() {
-  const [userId,     setUserId]     = useState(null)
-  const [checking,   setChecking]   = useState(true)
-  const location  = useLocation()
-  const navigate  = useNavigate()
-
-  useEffect(() => {
-    supabase.auth.getUser()
-      .then(({ data }) => setUserId(data?.user?.id || null))
-      .catch(() => setUserId(null))
-      .finally(() => setChecking(false))
-
-    // Listen for auth changes (e.g. sign-out from another tab)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user?.id || null)
-    })
-    return () => subscription.unsubscribe()
-  }, [])
-
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    setUserId(null)
-    navigate('/articles')
-  }
+  const { userId, isPro, checking } = useAuth()
+  const location = useLocation()
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-canvas flex flex-col" data-section="hub">
 
-      {/* ── Nav ──────────────────────────────────────────────────────────── */}
-      <header className="border-b border-gray-100 sticky top-0 z-30 bg-white/95 backdrop-blur-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-6">
+      {/* ── Top nav (shared across all sections) ─────────────────────────── */}
+      <TopNav userId={userId} isPro={isPro} checking={checking} />
 
-          {/* Logo — goes to home if logged in, articles if not */}
-          <Link
-            to={userId ? '/home' : '/articles'}
-            className="flex items-center gap-2 flex-shrink-0"
-          >
-            <span className="text-lg font-bold text-gray-950 tracking-tight">Chatter Club</span>
-          </Link>
+      {/* ── Persistent banner (logged-out / free users only) ──────────────── */}
+      {!checking && (
+        userId
+          ? !isPro && <ProBanner />
+          : <SignUpBanner />
+      )}
 
-          {/* Nav links */}
-          <nav className="hidden sm:flex items-center gap-6">
-            {userId && (
-              <NavLink to="/home" active={location.pathname === '/home'}>
-                Home
-              </NavLink>
-            )}
-            <NavLink to="/challenge" active={location.pathname === '/challenge'}>
-              Daily challenge
-            </NavLink>
-            <NavLink to="/puzzles" active={location.pathname.startsWith('/puzzles')}>
-              Puzzles
-            </NavLink>
-            <NavLink to="/podcasts" active={location.pathname.startsWith('/podcasts')}>
-              Podcast
-            </NavLink>
-            <NavLink to="/courses" active={location.pathname.startsWith('/courses')}>
-              Courses
-            </NavLink>
-            <NavLink to="/articles" active={location.pathname === '/articles'}>
-              Articles
-            </NavLink>
-            {userId && (
-              <NavLink to="/word-bank" active={location.pathname === '/word-bank'}>
-                Word bank
-              </NavLink>
-            )}
+      {/* ── Hub second nav ────────────────────────────────────────────────── */}
+      <div className="border-b border-gray-200 bg-canvas">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <nav className="flex gap-6 overflow-x-auto no-scrollbar">
+            {HUB_LINKS.map(({ to, label, match }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`whitespace-nowrap py-3 text-sm font-semibold border-b-2 transition-colors ${
+                  match(location.pathname)
+                    ? 'border-pink text-gray-900'
+                    : 'border-transparent text-gray-400 hover:text-gray-700'
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
           </nav>
-
-          {/* Auth */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            {!checking && (
-              userId ? (
-                <button
-                  onClick={handleSignOut}
-                  className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
-                >
-                  Sign out
-                </button>
-              ) : (
-                <>
-                  <Link
-                    to="/level-test"
-                    className="hidden sm:block text-sm text-gray-500 hover:text-gray-900 transition-colors"
-                  >
-                    Level test
-                  </Link>
-                  <Link
-                    to="/join"
-                    className="text-sm px-3.5 py-1.5 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
-                  >
-                    Join free
-                  </Link>
-                </>
-              )
-            )}
-          </div>
         </div>
-
-        {/* ── Mobile bottom nav ──────────────────────────────────────────── */}
-        {userId && (
-          <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-100 flex">
-            <MobileNavLink to="/home"      active={location.pathname === '/home'}                    icon="🏠" label="Home" />
-            <MobileNavLink to="/challenge" active={location.pathname === '/challenge'}               icon="🔥" label="Challenge" />
-            <MobileNavLink to="/puzzles"   active={location.pathname.startsWith('/puzzles')}         icon="🟩" label="Puzzles" />
-            <MobileNavLink to="/articles"  active={location.pathname === '/articles'}                icon="📖" label="Articles" />
-            <MobileNavLink to="/word-bank" active={location.pathname === '/word-bank'}               icon="📚" label="Words" />
-          </div>
-        )}
-      </header>
+      </div>
 
       {/* ── Page content ─────────────────────────────────────────────────── */}
-      <main className={`flex-1 ${userId ? 'pb-16 sm:pb-0' : ''}`}>
+      <main className="flex-1">
         <Outlet />
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-gray-100 mt-16">
-        <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
-          <span>© {new Date().getFullYear()} Chatter Club</span>
-          <div className="flex items-center gap-4">
-            {userId && <Link to="/home"     className="hover:text-gray-700 transition-colors">Home</Link>}
-            <Link to="/articles"            className="hover:text-gray-700 transition-colors">Articles</Link>
-            <Link to="/courses"            className="hover:text-gray-700 transition-colors">Courses</Link>
-            {userId && <Link to="/word-bank" className="hover:text-gray-700 transition-colors">Word bank</Link>}
-            <Link to="/join"               className="hover:text-gray-700 transition-colors">Join</Link>
-          </div>
-        </div>
-      </footer>
+      <HubFooter />
     </div>
   )
 }
 
-function NavLink({ to, active, children }) {
+// ── Persistent banners ────────────────────────────────────────────────────────
+
+function SignUpBanner() {
   return (
-    <Link
-      to={to}
-      className={`text-sm font-medium transition-colors ${
-        active ? 'text-gray-900' : 'text-gray-400 hover:text-gray-700'
-      }`}
-    >
-      {children}
-    </Link>
+    <div className="bg-green text-white py-2.5 px-4">
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-sm">
+        <span className="text-gray-300">
+          Sign up free to save your progress, translate words and build your word bank.
+        </span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Link
+            to="/join"
+            className="font-medium text-white underline underline-offset-2 hover:no-underline transition-all"
+          >
+            Sign up
+          </Link>
+          <Link
+            to="/join?mode=signin"
+            className="text-white/70 hover:text-white transition-colors"
+          >
+            Sign in
+          </Link>
+        </div>
+      </div>
+    </div>
   )
 }
 
-function MobileNavLink({ to, active, icon, label }) {
+function ProBanner() {
   return (
-    <Link
-      to={to}
-      className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors ${
-        active ? 'text-gray-900' : 'text-gray-400'
-      }`}
-    >
-      <span className="text-lg leading-none">{icon}</span>
-      {label}
+    <div className="bg-yellow-light border-b border-yellow/40 py-2.5 px-4">
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-sm">
+        <span className="text-gray-700">
+          Upgrade to Pro to unlock the full article archive, all podcasts and more.
+        </span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Link
+            to="/subscribe"
+            className="font-semibold text-gray-800 underline underline-offset-2 hover:no-underline transition-all"
+          >
+            See what's included
+          </Link>
+          <Link
+            to="/subscribe"
+            className="text-xs px-3 py-1 bg-yellow text-gray-900 rounded-lg hover:bg-yellow-dark transition-colors font-semibold"
+          >
+            Subscribe
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+function HubFooter() {
+  return (
+    <footer className="border-t border-gray-200 mt-16 bg-canvas">
+      <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm text-gray-500">
+
+        <div>
+          <p className="font-semibold text-gray-900 mb-3">Chatter Club</p>
+          <div className="space-y-2">
+            <FooterLink to="/articles">Articles</FooterLink>
+            <FooterLink to="/podcasts">Podcasts</FooterLink>
+            <FooterLink to="/puzzles">Puzzles</FooterLink>
+            <FooterLink to="/challenge">Daily Challenge</FooterLink>
+            <FooterLink to="/words">Word Bank</FooterLink>
+          </div>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-900 mb-3">Exam Prep</p>
+          <div className="space-y-2">
+            <FooterLink to="/exam">Exam Centre</FooterLink>
+            <FooterLink to="/exam/challenge">Daily Exam Challenge</FooterLink>
+            <FooterLink to="/exam/grammar">Grammar Reference</FooterLink>
+            <FooterLink to="/exam/practice">Practice Papers</FooterLink>
+          </div>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-900 mb-3">Courses</p>
+          <div className="space-y-2">
+            <FooterLink to="/courses">All Courses</FooterLink>
+            <FooterLink to="/courses?cat=exam-prep">Exam Prep</FooterLink>
+            <FooterLink to="/courses?cat=life-english">Life English</FooterLink>
+          </div>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-900 mb-3">Info</p>
+          <div className="space-y-2">
+            <FooterLink to="/level-test">Level Test</FooterLink>
+            <FooterLink to="/subscribe">Subscribe</FooterLink>
+            <FooterLink to="/privacy">Privacy</FooterLink>
+            <FooterLink to="/terms">Terms</FooterLink>
+          </div>
+        </div>
+      </div>
+      <div className="max-w-6xl mx-auto px-6 pb-8 text-xs text-gray-400">
+        © {new Date().getFullYear()} Chatter Club
+      </div>
+    </footer>
+  )
+}
+
+function FooterLink({ to, children }) {
+  return (
+    <Link to={to} className="block hover:text-gray-900 transition-colors">
+      {children}
     </Link>
   )
 }
