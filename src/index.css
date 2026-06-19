@@ -96,18 +96,19 @@
   --color-incorrect-bg: #fff1ed;
 
   /* Fonts */
-  --font-ui:      'League Spartan', system-ui, sans-serif;
-  --font-reading: 'Libre Baskerville', Georgia, serif;
+  --font-display: 'League Spartan', system-ui, sans-serif;   /* headings / titles only */
+  --font-ui:      'Libre Baskerville', Georgia, serif;        /* everything else */
 }
 
 /* ── Base layer ──────────────────────────────────────────────────────────── */
 @layer base {
 
   /* Page background — warm canvas, not stark white */
+  /* Base font: Libre Baskerville for all body/UI text */
   html {
     background-color: #fffbf5;
-    font-family: 'League Spartan', system-ui, sans-serif;
-    font-size: 16px;
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 15px;           /* Baskerville runs slightly larger optically than sans */
     color: #1a1a1a;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -117,37 +118,56 @@
     background-color: #fffbf5;
   }
 
-  /* Heading scale — League Spartan, tight tracking at large sizes */
+  /* ── Headings — League Spartan Bold (display role only) ─────────────────
+     Tight tracking at large sizes. Bold weight for contrast with Baskerville body.
+     The serif/sans contrast at heading vs body is the whole point of this pairing.
+  */
   h1 {
     font-family: 'League Spartan', system-ui, sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
   }
 
   h2 {
     font-family: 'League Spartan', system-ui, sans-serif;
     font-weight: 700;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
     line-height: 1.2;
   }
 
-  h3, h4, h5, h6 {
+  h3 {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+
+  h4, h5, h6 {
     font-family: 'League Spartan', system-ui, sans-serif;
     font-weight: 600;
     letter-spacing: -0.01em;
     line-height: 1.3;
   }
 
-  /* Body copy — League Spartan with slightly open tracking */
-  p, li, label, input, textarea, button, select {
-    font-family: 'League Spartan', system-ui, sans-serif;
-    letter-spacing: 0.01em;
-    line-height: 1.6;
+  /* ── Body / UI — Libre Baskerville ──────────────────────────────────────
+     Baskerville is designed for comfortable reading at paragraph scale.
+     Works well for nav links, buttons, labels, cards — gives the whole
+     product a warmer, less corporate tone than a sans-serif UI font.
+     Line height 1.65 — slightly looser than pure prose to work at UI sizes.
+  */
+  p, li, span, label, input, textarea, select {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    line-height: 1.65;
+  }
+
+  button {
+    font-family: 'Libre Baskerville', Georgia, serif;
   }
 
   /* Links */
   a {
+    font-family: 'Libre Baskerville', Georgia, serif;
     color: inherit;
     text-decoration: none;
   }
@@ -156,33 +176,26 @@
 /* ── Article reading surface ─────────────────────────────────────────────── */
 /*
    Applied with class="article-body" on the article container.
-   Libre Baskerville at 18px / 1.75 line-height.
-   Max width ~68ch — keeps lines in the 60-70 char sweet spot.
-   Paragraph spacing 1em. Generous margins between headings and lists.
+   Libre Baskerville is already the base font — this just sets the reading-
+   optimised size, line-height and max-width for long-form content.
+   Subheadings within articles use League Spartan (inherited from h2/h3 rules).
 */
 .article-body {
-  font-family: 'Libre Baskerville', Georgia, serif;
   font-size: 18px;
-  line-height: 1.75;
-  letter-spacing: 0.005em;   /* very slight — serif reads well naturally */
+  line-height: 1.8;
   color: #1a1a1a;
   max-width: 68ch;
 }
 
 .article-body p {
-  font-family: 'Libre Baskerville', Georgia, serif;
   font-size: 18px;
-  line-height: 1.75;
-  letter-spacing: 0.005em;
-  margin-bottom: 1em;
+  line-height: 1.8;
+  margin-bottom: 1.1em;
 }
 
 .article-body h2 {
-  font-family: 'League Spartan', system-ui, sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
+  /* League Spartan inherited from h2 base rule */
+  font-size: 1.2rem;
   margin-top: 1.75em;
   margin-bottom: 0.5em;
 }
@@ -193,33 +206,35 @@
 }
 
 .article-body li {
-  font-family: 'Libre Baskerville', Georgia, serif;
   font-size: 18px;
-  line-height: 1.7;
-  letter-spacing: 0.005em;
+  line-height: 1.75;
   margin-bottom: 0.4em;
 }
 
-.article-body strong {
-  font-weight: 700;
-}
-
-.article-body em {
-  font-style: italic;
-}
+.article-body strong { font-weight: 700; }
+.article-body em     { font-style: italic; }
 
 /* ── Exercise / question text ────────────────────────────────────────────── */
 /*
-   Applied with class="exercise-text" on MCQ, gap fill, etc.
-   League Spartan at 17px — slightly larger than standard UI text.
-   Looser line height than article — students read each line as a unit.
+   Applied with class="exercise-text" on MCQ, gap fill, key word items etc.
+   Libre Baskerville (base font) at 17px. Slightly larger than standard UI.
+   Generous line height — students parse each sentence carefully.
 */
 .exercise-text {
-  font-family: 'League Spartan', system-ui, sans-serif;
   font-size: 17px;
-  line-height: 1.65;
-  letter-spacing: 0.01em;
+  line-height: 1.7;
   color: #1a1a1a;
+}
+
+/* ── Nav / badge labels — keep League Spartan for small caps and badges ──── */
+/*
+   Very small text (labels, CEFR badges, breadcrumbs, timestamps) reads better
+   in League Spartan than Baskerville because the serif gets too fussy at tiny
+   sizes. Apply .label-text to these elements.
+*/
+.label-text {
+  font-family: 'League Spartan', system-ui, sans-serif;
+  letter-spacing: 0.02em;
 }
 
 /* ── Section colour utilities ────────────────────────────────────────────── */
