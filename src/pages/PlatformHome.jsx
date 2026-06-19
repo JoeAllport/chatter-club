@@ -52,7 +52,7 @@ export default function PlatformHome() {
       if (!mounted) return
 
       if (!user) {
-        navigate('/join', { replace: true })
+        navigate('/', { replace: true })
         return
       }
       setUserId(user.id)
@@ -134,7 +134,7 @@ export default function PlatformHome() {
 
         <div className="flex items-center gap-3">
           <Link
-            to="/word-bank"
+            to="/words"
             className="text-sm px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
           >
             📚 Word bank

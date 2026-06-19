@@ -10,7 +10,7 @@
 //   6. Footer
 
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import TopNav from '../components/TopNav'
 import PageMeta from '../components/PageMeta'
@@ -161,8 +161,20 @@ const CARDS = [
 export default function HomePage() {
   const { userId, isPro, checking } = useAuth()
 
-  // If logged in, redirect to hub — or just show the full page anyway
-  // (user can always visit / and see the marketing page — that's intentional)
+  // Auth confirmed + logged in → send straight to the hub dashboard
+  // Logged out or still checking → show the marketing page
+  if (!checking && userId) {
+    return <Navigate to="/home" replace />
+  }
+
+  // While auth is loading, render nothing (avoids flash of marketing page for members)
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-green border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
