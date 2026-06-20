@@ -304,8 +304,8 @@ export default function HomePage() {
                 body: 'A daily challenge, a puzzle, a short article. Small habits compound. You will notice the difference.',
               },
               {
-                headline: 'From A2 to exam-ready',
-                body: 'CEFR-levelled content from beginner to Cambridge B2 First and beyond — all in one place.',
+                headline: 'From beginner to exam-ready',
+                body: 'Easy, Medium and Advanced content — from everyday English to Cambridge B2 First and beyond.',
               },
               {
                 headline: 'Built by teachers',

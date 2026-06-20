@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import PageMeta from '../../components/PageMeta'
 
@@ -74,7 +74,8 @@ function wordCells(word) {
 // ── PuzzleCrossword ───────────────────────────────────────────────────────────
 
 export default function PuzzleCrossword() {
-  const today = todayStr()
+  const { date } = useParams()
+  const today = date || todayStr()
 
   const [puzzle,      setPuzzle]      = useState(null)
   const [userId,      setUserId]      = useState(null)

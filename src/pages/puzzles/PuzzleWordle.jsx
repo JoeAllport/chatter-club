@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import PageMeta from '../../components/PageMeta'
 
@@ -125,8 +125,9 @@ function Keyboard({ letterStates, onKey, disabled }) {
 // ── PuzzleWordle ──────────────────────────────────────────────────────────────
 
 export default function PuzzleWordle() {
-  const navigate = useNavigate()
-  const today    = todayStr()
+  const navigate    = useNavigate()
+  const { date }    = useParams()
+  const today       = date || todayStr()
 
   // ── State ─────────────────────────────────────────────────────────────────
   const [puzzle,      setPuzzle]      = useState(null)    // { word, definition }

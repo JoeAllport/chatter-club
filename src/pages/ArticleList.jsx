@@ -2,24 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import PageMeta from '../components/PageMeta'
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const LEVEL_COLOURS = {
-  A1:   'bg-pink-100 text-pink-800 border-pink-200',
-  A2:   'bg-orange-100 text-orange-800 border-orange-200',
-  B1:   'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'B1+':'bg-yellow-100 text-yellow-900 border-yellow-300',
-  B2:   'bg-green-100 text-green-800 border-green-200',
-  'B2+':'bg-green-100 text-green-900 border-green-300',
-  C1:   'bg-blue-100 text-blue-800 border-blue-200',
-  C2:   'bg-purple-100 text-purple-800 border-purple-200',
-}
-
-const LEVELS = ['A1','A2','A2+','B1','B1+','B2','B2+','C1','C2']
-
-// Tier order for range display
-const TIER_LEVEL = { foundation: 'A2+', standard: 'B1+', advanced: 'C1' }
+import { cefrToDisplay, tierToDisplay, levelPillClass, DISPLAY_LEVEL_COLOURS, DISPLAY_TO_CEFR, LEVEL_FILTER_OPTIONS } from '../lib/levels'
 
 const TOPIC_LABELS = {
   environment: 'Environment', business: 'Business',   travel:    'Travel',
@@ -35,20 +18,20 @@ function readTime(wordCount) {
 // ── Article card ──────────────────────────────────────────────────────────────
 
 function LevelPill({ article: a }) {
-  // If tiered, show range e.g. "A2+–C1"; otherwise show single level
+  // Tiered article — show all three tiers as dots + "Easy · Medium · Advanced"
   if (a.tiers?.length > 1) {
-    const levels = a.tiers.map(t => TIER_LEVEL[t]).filter(Boolean)
-    const range  = `${levels[0]}–${levels[levels.length - 1]}`
     return (
       <span className="text-xs px-2.5 py-1 rounded-full border font-semibold bg-gray-100 text-gray-700 border-gray-200">
-        {range}
+        Easy · Medium · Advanced
       </span>
     )
   }
   if (!a.level) return null
+  const label = cefrToDisplay(a.level)
+  if (!label) return null
   return (
-    <span className={`text-xs px-2.5 py-1 rounded-full border font-semibold ${LEVEL_COLOURS[a.level] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>
-      {a.level}
+    <span className={`text-xs px-2.5 py-1 rounded-full border font-semibold ${levelPillClass(a.level)}`}>
+      {label}
     </span>
   )
 }
@@ -212,15 +195,13 @@ export default function ArticleList() {
   }
 
   const filtered = articles.filter(a => {
-    // For tiered articles the card represents the full A2+–C1 range,
-    // so a level filter matches if any tier covers that level.
+    // levelFilter is now 'all' | 'Easy' | 'Medium' | 'Advanced'
     const levelOk = levelFilter === 'all' || (() => {
       if (a.tiers?.length > 1) {
-        // Map each tier to its representative level and check if any match
-        const tierLevels = (a.tiers || []).map(t => TIER_LEVEL[t]).filter(Boolean)
-        return tierLevels.includes(levelFilter)
+        // Tiered article covers all three levels — always matches any filter
+        return true
       }
-      return a.level === levelFilter
+      return cefrToDisplay(a.level) === levelFilter
     })()
     const topicOk = topicFilter === 'all' || (a.topic_tags || []).includes(topicFilter)
     return levelOk && topicOk
@@ -234,7 +215,7 @@ export default function ArticleList() {
     <div>
       <PageMeta
         title="Read English Articles"
-        description="Real articles at every CEFR level — Foundation (A2+), Standard (B1+), and Advanced (C1). Read, learn vocabulary, and improve your English every day."
+        description="Real articles at every level — Easy, Medium, and Advanced. Read, learn vocabulary, and improve your English every day."
         canonical="/articles"
       />
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
@@ -258,14 +239,14 @@ export default function ArticleList() {
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs text-gray-400 font-medium mr-1">Level</span>
             <FilterPill active={levelFilter === 'all'} onClick={() => setLevelFilter('all')}>All</FilterPill>
-            {LEVELS.map(lvl => (
+            {LEVEL_FILTER_OPTIONS.map(({ value, label, pillClass }) => (
               <FilterPill
-                key={lvl}
-                active={levelFilter === lvl}
-                onClick={() => setLevelFilter(lvl === levelFilter ? 'all' : lvl)}
-                colour={levelFilter === lvl ? LEVEL_COLOURS[lvl] : null}
+                key={value}
+                active={levelFilter === value}
+                onClick={() => setLevelFilter(value === levelFilter ? 'all' : value)}
+                colour={levelFilter === value ? pillClass : null}
               >
-                {lvl}
+                {label}
               </FilterPill>
             ))}
           </div>

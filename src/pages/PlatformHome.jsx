@@ -193,10 +193,10 @@ export default function PlatformHome() {
           .limit(1)
           .maybeSingle(),
         supabase
-          .from('podcast_episodes')
+          .from('podcasts')
           .select('id, title, description')
-          .eq('is_published', true)
-          .order('published_at', { ascending: false })
+          .eq('status', 'published')
+          .order('episode_number', { ascending: false })
           .limit(1)
           .maybeSingle(),
       ])

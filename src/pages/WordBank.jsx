@@ -1,19 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const LEVEL_COLOURS = {
-  A1:   'bg-pink-100 text-pink-800',
-  A2:   'bg-orange-100 text-orange-800',
-  B1:   'bg-yellow-100 text-yellow-800',
-  'B1+':'bg-yellow-100 text-yellow-900',
-  B2:   'bg-green-100 text-green-800',
-  'B2+':'bg-green-100 text-green-900',
-  C1:   'bg-blue-100 text-blue-800',
-  C2:   'bg-purple-100 text-purple-800',
-}
+import { cefrToDisplay, levelPillClass } from '../lib/levels'
 
 // ── Flashcard component ────────────────────────────────────────────────────────
 
@@ -374,8 +362,8 @@ export default function WordBank() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       {group.level && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${LEVEL_COLOURS[group.level] || 'bg-gray-100 text-gray-600'}`}>
-                          {group.level}
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${levelPillClass(group.level)}`}>
+                          {cefrToDisplay(group.level)}
                         </span>
                       )}
                       {group.slug ? (

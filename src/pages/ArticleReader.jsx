@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { tierToDisplay, DISPLAY_LEVEL_COLOURS } from '../lib/levels'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -27,11 +28,11 @@ const LEVEL_COLOURS = {
   C2:   'bg-purple-100 text-purple-800 border-purple-200',
 }
 
-// Tier display config — Foundation/Standard/Advanced
+// Tier display config — Easy/Medium/Advanced (no CEFR codes shown to users)
 const TIER_CONFIG = {
-  foundation: { label: 'Foundation', level: 'A2+', colour: 'bg-orange-100 text-orange-800 border-orange-300' },
-  standard:   { label: 'Standard',   level: 'B1+', colour: 'bg-yellow-100 text-yellow-900 border-yellow-300' },
-  advanced:   { label: 'Advanced',   level: 'C1',  colour: 'bg-blue-100 text-blue-800 border-blue-200'     },
+  foundation: { label: 'Easy',     colour: DISPLAY_LEVEL_COLOURS.Easy },
+  standard:   { label: 'Medium',   colour: DISPLAY_LEVEL_COLOURS.Medium },
+  advanced:   { label: 'Advanced', colour: DISPLAY_LEVEL_COLOURS.Advanced },
 }
 
 const SAVE_DEBOUNCE_MS = 4000
@@ -353,15 +354,14 @@ function TierSwitcher({ currentArticle, siblings }) {
           <button
             key={a.id}
             onClick={() => handleSwitch(a)}
-            title={a.isCurrent ? 'You are reading this level' : `Switch to ${cfg.label} (${cfg.level})`}
-            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+            title={a.isCurrent ? `You are reading the ${cfg.label} version` : `Switch to ${cfg.label}`}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
               a.isCurrent
                 ? cfg.colour + ' shadow-sm cursor-default'
                 : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700 cursor-pointer'
             }`}
           >
             {cfg.label}
-            <span className="opacity-60">{cfg.level}</span>
           </button>
         )
       })}
@@ -377,7 +377,8 @@ function SEOHead({ article }) {
     const desc = article.subtitle
       || (article.body_text || '').slice(0, 160).replace(/\n/g, ' ').trim()
 
-    document.title = `${article.title} | ${article.level ? article.level + ' English' : 'English'}`
+    const displayLevel = article.article_tier ? TIER_CONFIG[article.article_tier]?.label : null
+    document.title = `${article.title} | ${displayLevel ? displayLevel + ' English' : 'English'}`
 
     const setMeta = (name, content, prop = false) => {
       const sel = prop ? `meta[property="${name}"]` : `meta[name="${name}"]`
@@ -804,9 +805,9 @@ export default function ArticleReader() {
 
         {/* Meta row */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          {article.level && (
-            <span className={`text-xs px-2.5 py-1 rounded-full border font-semibold ${LEVEL_COLOURS[article.level] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>
-              {article.level}
+          {article.article_tier && TIER_CONFIG[article.article_tier] && (
+            <span className={`text-xs px-2.5 py-1 rounded-full border font-semibold ${TIER_CONFIG[article.article_tier].colour}`}>
+              {TIER_CONFIG[article.article_tier].label}
             </span>
           )}
           {(article.topic_tags || []).map(tag => (

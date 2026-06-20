@@ -2,15 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import PageMeta from '../components/PageMeta'
-
-const LEVEL_COLOURS = {
-  A1: 'bg-pink-100 text-pink-700',
-  A2: 'bg-orange-100 text-orange-700',
-  B1: 'bg-yellow-100 text-yellow-800',
-  B2: 'bg-green-100 text-green-800',
-  C1: 'bg-blue-100 text-blue-800',
-  C2: 'bg-purple-100 text-purple-800',
-}
+import { cefrToDisplay, levelPillClass } from '../lib/levels'
 
 function formatDuration(seconds) {
   if (!seconds) return null
@@ -116,8 +108,8 @@ export default function PodcastList() {
                         <span className="text-xs text-gray-400">Ep. {podcast.episode_number}</span>
                       )}
                       {podcast.level && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${LEVEL_COLOURS[podcast.level] || 'bg-gray-100 text-gray-600'}`}>
-                          {podcast.level}
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${levelPillClass(podcast.level)}`}>
+                          {cefrToDisplay(podcast.level)}
                         </span>
                       )}
                       {!podcast.is_free && (

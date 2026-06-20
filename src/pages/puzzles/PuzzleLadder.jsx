@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import PageMeta from '../../components/PageMeta'
 
@@ -98,7 +98,8 @@ function Keyboard({ onKey, disabled }) {
 // ── PuzzleLadder ──────────────────────────────────────────────────────────────
 
 export default function PuzzleLadder() {
-  const today = todayStr()
+  const { date } = useParams()
+  const today = date || todayStr()
 
   const [puzzle,       setPuzzle]       = useState(null)   // { start, target, par }
   const [userId,       setUserId]       = useState(null)

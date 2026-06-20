@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import PageMeta from '../../components/PageMeta'
 
@@ -168,6 +168,7 @@ export default function PuzzleHub() {
                 isDone={isDone}
                 completion={completion}
                 userId={userId}
+                today={today}
               />
             )
           })}
@@ -184,12 +185,12 @@ export default function PuzzleHub() {
 
 // ── PuzzleCard ────────────────────────────────────────────────────────────────
 
-function PuzzleCard({ puzzle, isAvailable, isDone, completion, userId }) {
+function PuzzleCard({ puzzle, isAvailable, isDone, completion, userId, today }) {
   const scoreLabel = getScoreLabel(puzzle.type, completion)
 
   return (
     <Link
-      to={isAvailable ? puzzle.route : '#'}
+      to={isAvailable ? `${puzzle.route}/${today}` : puzzle.route}
       className={`block rounded-2xl border-2 p-4 transition-all
         ${isAvailable
           ? `${puzzle.colour} hover:shadow-md hover:scale-[1.01] active:scale-[0.99]`

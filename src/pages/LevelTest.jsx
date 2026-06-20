@@ -3,31 +3,17 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAdaptiveTest, LEVELS } from '../hooks/useAdaptiveTest'
 import PageMeta from '../components/PageMeta'
+import { cefrToDisplay, levelTestResult } from '../lib/levels'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const LEVEL_TEST_SET_NAME = 'Level Test Items'
 
-const LEVEL_COLOURS = {
-  A1:   { bg: 'bg-pink-500',   text: 'text-pink-500',   ring: 'ring-pink-200',   label: 'bg-pink-100 text-pink-800' },
-  A2:   { bg: 'bg-orange-500', text: 'text-orange-500', ring: 'ring-orange-200', label: 'bg-orange-100 text-orange-800' },
-  B1:   { bg: 'bg-yellow-500', text: 'text-yellow-600', ring: 'ring-yellow-200', label: 'bg-yellow-100 text-yellow-800' },
-  'B1+':{ bg: 'bg-yellow-500', text: 'text-yellow-700', ring: 'ring-yellow-300', label: 'bg-yellow-100 text-yellow-900' },
-  B2:   { bg: 'bg-green-500',  text: 'text-green-600',  ring: 'ring-green-200',  label: 'bg-green-100 text-green-800' },
-  'B2+':{ bg: 'bg-green-600',  text: 'text-green-700',  ring: 'ring-green-300',  label: 'bg-green-100 text-green-900' },
-  C1:   { bg: 'bg-blue-500',   text: 'text-blue-600',   ring: 'ring-blue-200',   label: 'bg-blue-100 text-blue-800' },
-  C2:   { bg: 'bg-purple-500', text: 'text-purple-600', ring: 'ring-purple-200', label: 'bg-purple-100 text-purple-800' },
-}
-
-const LEVEL_DESCRIPTIONS = {
-  A1:   'Beginner',
-  A2:   'Elementary',
-  B1:   'Intermediate',
-  'B1+':'Upper-Intermediate (lower)',
-  B2:   'Upper-Intermediate',
-  'B2+':'Advanced (lower)',
-  C1:   'Advanced',
-  C2:   'Proficiency',
+// Display colours for the three tiers
+const DISPLAY_COLOURS = {
+  Easy:     { bg: 'bg-green-500',  text: 'text-green-600',  ring: 'ring-green-200'  },
+  Medium:   { bg: 'bg-yellow-500', text: 'text-yellow-600', ring: 'ring-yellow-200' },
+  Advanced: { bg: 'bg-blue-500',   text: 'text-blue-600',   ring: 'ring-blue-200'   },
 }
 
 const SKILL_LABELS = {
@@ -101,7 +87,7 @@ export default function LevelTest() {
       <PageShell>
         <PageMeta
           title="English Level Test"
-          description="Find your CEFR level in 10 minutes. Adaptive test from A1 to C2 — no sign-up required."
+          description="Find your English level in 10 minutes. Adaptive test — Easy, Medium, or Advanced. No sign-up required."
           canonical="/level-test"
         />
         <div className="flex flex-col items-center justify-center min-h-[50vh]">
@@ -411,7 +397,8 @@ function LevelErrorCorrection({ item, onAnswer }) {
 
 function ResultScreen({ result, onRetake, onSignUp }) {
   const { level, skillScores, log } = result
-  const colours = LEVEL_COLOURS[level] || LEVEL_COLOURS['B1']
+  const { display, description } = levelTestResult(level)
+  const colours = DISPLAY_COLOURS[display] || DISPLAY_COLOURS.Medium
 
   const [email,    setEmail]    = useState('')
   const [sending,  setSending]  = useState(false)
@@ -477,7 +464,7 @@ function ResultScreen({ result, onRetake, onSignUp }) {
   }
 
   function handleShare() {
-    const text = `I just took the Chatter Club English Level Test and scored ${level} (${LEVEL_DESCRIPTIONS[level]})! 🎓 Find out your level:`
+    const text = `I just took the Chatter Club English Level Test — I'm ${display} level! 🎓 Find out yours:`
     const url  = `${window.location.origin}/level-test`
     if (navigator.share) {
       navigator.share({ title: 'My English Level', text, url }).catch(() => {})
@@ -497,12 +484,12 @@ function ResultScreen({ result, onRetake, onSignUp }) {
       {/* ── Level badge ─────────────────────────────────────────────────── */}
       <div className="text-center mb-8">
         <div className={`inline-flex items-center justify-center w-28 h-28 rounded-full ${colours.bg} ring-8 ${colours.ring} mb-5`}>
-          <span className="text-4xl font-black text-white tracking-tight">{level}</span>
+          <span className="text-2xl font-black text-white tracking-tight">{display}</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-950 mb-1">
-          Your level is <span className={colours.text}>{level}</span>
+          Your level: <span className={colours.text}>{display}</span>
         </h1>
-        <p className="text-gray-400 text-sm">{LEVEL_DESCRIPTIONS[level]}</p>
+        <p className="text-gray-500 text-sm max-w-xs mx-auto">{description}</p>
         <p className="text-xs text-gray-300 mt-1">
           {correctCount} of {log.length} questions correct
         </p>
@@ -537,21 +524,24 @@ function ResultScreen({ result, onRetake, onSignUp }) {
         </div>
       </div>
 
-      {/* ── CEFR scale ───────────────────────────────────────────────────── */}
+      {/* ── Three-tier indicator ─────────────────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Where you sit on the CEFR scale</h2>
-        <div className="flex items-end gap-1">
-          {LEVELS.map((l, i) => {
-            const isYou = l === level
-            const col   = LEVEL_COLOURS[l] || LEVEL_COLOURS['B1']
-            const height = [20, 28, 36, 42, 52, 60, 72, 88][i] || 36
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Where you sit</h2>
+        <div className="flex gap-3">
+          {['Easy', 'Medium', 'Advanced'].map(tier => {
+            const isYou  = display === tier
+            const col    = DISPLAY_COLOURS[tier]
             return (
-              <div key={l} className="flex flex-col items-center flex-1 gap-1">
-                <div
-                  className={`w-full rounded-t-lg transition-all ${isYou ? col.bg : 'bg-gray-100'}`}
-                  style={{ height: `${height}px` }}
-                />
-                <span className={`text-[10px] font-bold ${isYou ? col.text : 'text-gray-300'}`}>{l}</span>
+              <div
+                key={tier}
+                className={`flex-1 rounded-xl p-3 text-center border-2 transition-all ${
+                  isYou
+                    ? `${col.bg} border-transparent`
+                    : 'bg-gray-50 border-gray-100'
+                }`}
+              >
+                <p className={`text-sm font-bold ${isYou ? 'text-white' : 'text-gray-300'}`}>{tier}</p>
+                {isYou && <p className="text-white/80 text-xs mt-0.5">You</p>}
               </div>
             )
           })}

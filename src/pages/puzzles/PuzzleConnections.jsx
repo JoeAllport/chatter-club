@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import PageMeta from '../../components/PageMeta'
 
@@ -33,7 +33,8 @@ function shuffle(arr) {
 // ── PuzzleConnections ─────────────────────────────────────────────────────────
 
 export default function PuzzleConnections() {
-  const today = todayStr()
+  const { date } = useParams()
+  const today = date || todayStr()
 
   const [puzzle,     setPuzzle]     = useState(null)   // { groups: [{category, words, level}] }
   const [userId,     setUserId]     = useState(null)

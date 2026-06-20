@@ -35,6 +35,7 @@ import PuzzleConnections from './pages/puzzles/PuzzleConnections'
 import PuzzleLadder      from './pages/puzzles/PuzzleLadder'
 import PuzzleHive        from './pages/puzzles/PuzzleHive'
 import PuzzleCrossword   from './pages/puzzles/PuzzleCrossword'
+import PuzzleCalendarPage from './pages/puzzles/PuzzleCalendarPage'
 
 // ── Exam Centre pages (inside ExamLayout) ────────────────────────────────────
 import ExamHome          from './pages/exam/ExamHome'
@@ -53,6 +54,7 @@ import UnitPage       from './pages/courses/UnitPage'
 import LessonSession from './pages/session/LessonSession'
 
 // ── Auth + onboarding ────────────────────────────────────────────────────────
+import Subscribe    from './pages/Subscribe'
 import Join         from './pages/Join'
 import AuthCallback from './pages/AuthCallback'
 import Onboarding   from './pages/Onboarding'
@@ -110,13 +112,20 @@ export default function App() {
           <Route path="/level-test"         element={<LevelTest />} />
           <Route path="/podcasts"           element={<PodcastList />} />
           <Route path="/podcasts/:id"       element={<PodcastPlayer />} />
-          {/* Puzzle games */}
-          <Route path="/puzzles"            element={<PuzzleHub />} />
-          <Route path="/puzzles/wordle"     element={<PuzzleWordle />} />
-          <Route path="/puzzles/connections" element={<PuzzleConnections />} />
-          <Route path="/puzzles/ladder"     element={<PuzzleLadder />} />
-          <Route path="/puzzles/hive"       element={<PuzzleHive />} />
-          <Route path="/puzzles/crossword"  element={<PuzzleCrossword />} />
+          {/* Puzzle hub */}
+          <Route path="/puzzles"                       element={<PuzzleHub />} />
+          {/* Puzzle landing pages (calendar) */}
+          <Route path="/puzzles/wordle"                element={<PuzzleCalendarPage puzzleType="wordle" />} />
+          <Route path="/puzzles/connections"           element={<PuzzleCalendarPage puzzleType="connections" />} />
+          <Route path="/puzzles/ladder"                element={<PuzzleCalendarPage puzzleType="ladder" />} />
+          <Route path="/puzzles/hive"                  element={<PuzzleCalendarPage puzzleType="hive" />} />
+          <Route path="/puzzles/crossword"             element={<PuzzleCalendarPage puzzleType="crossword" />} />
+          {/* Puzzle game routes (by date) */}
+          <Route path="/puzzles/wordle/:date"          element={<PuzzleWordle />} />
+          <Route path="/puzzles/connections/:date"     element={<PuzzleConnections />} />
+          <Route path="/puzzles/ladder/:date"          element={<PuzzleLadder />} />
+          <Route path="/puzzles/hive/:date"            element={<PuzzleHive />} />
+          <Route path="/puzzles/crossword/:date"       element={<PuzzleCrossword />} />
         </Route>
 
         {/* ── Exam Centre ───────────────────────────────────────────────────── */}
@@ -148,8 +157,8 @@ export default function App() {
           element={<LessonSession />}
         />
 
-        {/* ── Subscribe placeholder ─────────────────────────────────────────── */}
-        <Route path="/subscribe" element={<Navigate to="/join" replace />} />
+        {/* ── Subscribe page ────────────────────────────────────────────────── */}
+        <Route path="/subscribe" element={<Subscribe />} />
 
         {/* ── Auth + onboarding ─────────────────────────────────────────────── */}
         <Route path="/join"          element={<Join />} />
