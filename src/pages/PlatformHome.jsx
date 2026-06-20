@@ -1,53 +1,166 @@
+// PlatformHome.jsx — Hub dashboard (/home)
+// Layout:
+//   1. Auto-scrolling tile strip — all sections/features, loops continuously
+//   2. "This week" — latest Article, Podcast, Daily Challenge
+//   3. "Games & Puzzles" — 5 puzzle tiles
+
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import PageMeta from '../components/PageMeta'
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// ── Section / feature tile definitions ───────────────────────────────────────
+// Each tile: the section or feature it represents, its colour, emoji placeholder
+// Illustrations slot in via `illustration` field when ready.
 
-const LEVEL_COLOURS = {
-  A1:   'bg-pink-100 text-pink-800',
-  A2:   'bg-orange-100 text-orange-800',
-  B1:   'bg-yellow-100 text-yellow-800',
-  'B1+':'bg-yellow-100 text-yellow-900',
-  B2:   'bg-green-100 text-green-800',
-  'B2+':'bg-green-100 text-green-900',
-  C1:   'bg-blue-100 text-blue-800',
-  C2:   'bg-purple-100 text-purple-800',
+const SECTION_TILES = [
+  { label: 'articles',        to: '/articles',   colour: '#4b7fc1', bg: '#eef3fb', emoji: '📖' },
+  { label: 'daily challenge', to: '/challenge',  colour: '#f4bb59', bg: '#fffbee', emoji: '⚡' },
+  { label: 'games',           to: '/puzzles',    colour: '#f76639', bg: '#fff1ed', emoji: '🎲' },
+  { label: 'podcast',         to: '/podcasts',   colour: '#f4bb59', bg: '#fffbee', emoji: '🎧' },
+  { label: 'exam prep',       to: '/exam',       colour: '#4b7fc1', bg: '#eef3fb', emoji: '📝' },
+  { label: 'courses',         to: '/courses',    colour: '#72c09e', bg: '#edf8f3', emoji: '🎓' },
+  { label: 'word bank',       to: '/words',      colour: '#c2bdf5', bg: '#f4f3ff', emoji: '💬' },
+  { label: 'level test',      to: '/level-test', colour: '#ffb1c1', bg: '#fff0f3', emoji: '📊' },
+]
+
+const PUZZLE_TILES = [
+  { label: 'wordup',      to: '/puzzles/wordle',      colour: '#f4bb59', bg: '#fffbee', emoji: '🟩', name: 'WordUp' },
+  { label: 'clusters',    to: '/puzzles/connections',  colour: '#c2bdf5', bg: '#f4f3ff', emoji: '🟣', name: 'Clusters' },
+  { label: 'word ladder', to: '/puzzles/ladder',       colour: '#63c7ec', bg: '#edf8fd', emoji: '🪜', name: 'Word Ladder' },
+  { label: 'letter hive', to: '/puzzles/hive',         colour: '#f4bb59', bg: '#fffbee', emoji: '🐝', name: 'Letter Hive' },
+  { label: 'crossword',   to: '/puzzles/crossword',    colour: '#72c09e', bg: '#edf8f3', emoji: '✏️', name: 'Crossword' },
+]
+
+// ── Auto-scrolling tile strip ─────────────────────────────────────────────────
+// Duplicates the tile array to create a seamless loop.
+
+function ScrollingTileStrip() {
+  // Duplicate so the loop is seamless
+  const tiles = [...SECTION_TILES, ...SECTION_TILES]
+
+  return (
+    <div className="overflow-hidden w-full mb-10 select-none">
+      <div className="flex gap-4 w-max animate-scroll-tiles">
+        {tiles.map((tile, i) => (
+          <Link
+            key={i}
+            to={tile.to}
+            className="flex flex-col items-center gap-2 group flex-shrink-0"
+            tabIndex={i >= SECTION_TILES.length ? -1 : 0} // only first set is focusable
+            aria-hidden={i >= SECTION_TILES.length}
+          >
+            <div
+              className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl transition-transform group-hover:scale-105"
+              style={{ backgroundColor: tile.bg, border: `2px solid ${tile.colour}20` }}
+            >
+              {tile.emoji}
+            </div>
+            <span className="tile-label" style={{ color: tile.colour === '#fffbee' ? '#d9a030' : tile.colour }}>
+              {tile.label}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
 }
 
-const GOAL_LABELS = {
-  general:      'General English',
-  cambridge_b2: 'Cambridge B2',
-  business:     'Business English',
-  travel:       'Travel & Culture',
+// ── Square tile (used for puzzles) ────────────────────────────────────────────
+
+function PuzzleTile({ tile }) {
+  return (
+    <Link
+      to={tile.to}
+      className="flex flex-col items-center gap-2 group"
+    >
+      <div
+        className="w-full aspect-square rounded-2xl flex items-center justify-center text-4xl transition-transform group-hover:scale-105"
+        style={{ backgroundColor: tile.bg, border: `2px solid ${tile.colour}30` }}
+      >
+        {tile.emoji}
+      </div>
+      <span className="tile-label text-center" style={{ color: tile.colour }}>
+        {tile.label}
+      </span>
+    </Link>
+  )
 }
 
-function readTime(wordCount) {
-  return `${Math.max(1, Math.round((wordCount || 0) / 200))} min read`
+// ── "This week" content card ───────────────────────────────────────────────────
+
+function WeekCard({ colour, bg, label, emoji, title, subtitle, to, loading }) {
+  return (
+    <Link
+      to={to}
+      className="group flex flex-col rounded-2xl overflow-hidden border-2 transition-all hover:shadow-lg hover:-translate-y-0.5"
+      style={{ borderColor: `${colour}30`, backgroundColor: bg }}
+    >
+      {/* Coloured header strip */}
+      <div
+        className="px-4 py-3 flex items-center gap-2"
+        style={{ backgroundColor: colour }}
+      >
+        <span className="text-lg">{emoji}</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-white/90" style={{ fontFamily: "'League Spartan', sans-serif" }}>
+          {label}
+        </span>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 py-4 flex-1 flex flex-col justify-between">
+        {loading ? (
+          <div className="space-y-2 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4" />
+            <div className="h-3 bg-gray-100 rounded w-1/2" />
+          </div>
+        ) : (
+          <>
+            <div>
+              <p className="font-700 text-gray-900 leading-snug text-sm line-clamp-2 mb-1 font-bold">
+                {title || 'Coming soon'}
+              </p>
+              {subtitle && (
+                <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{subtitle}</p>
+              )}
+            </div>
+            <p
+              className="mt-3 text-xs font-bold group-hover:underline"
+              style={{ color: colour === '#f4bb59' ? '#d9a030' : colour }}
+            >
+              {label === 'daily challenge' ? 'Start today →' : 'Read now →'}
+            </p>
+          </>
+        )}
+      </div>
+    </Link>
+  )
 }
 
-function greeting() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 18) return 'Good afternoon'
-  return 'Good evening'
+// ── Section heading ───────────────────────────────────────────────────────────
+
+function SectionHeading({ children }) {
+  return (
+    <h2 className="text-2xl sm:text-3xl font-bold text-gray-950 mb-6 uppercase" style={{ fontFamily: "'League Spartan', sans-serif", letterSpacing: '-0.02em' }}>
+      {children}
+    </h2>
+  )
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Main component ────────────────────────────────────────────────────────────
 
 export default function PlatformHome() {
   const navigate = useNavigate()
 
-  const [profile,  setProfile]  = useState(null)
-  const [articles, setArticles] = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [userId,   setUserId]   = useState(null)
+  const [loading,   setLoading]   = useState(true)
+  const [article,   setArticle]   = useState(null)
+  const [podcast,   setPodcast]   = useState(null)
+  const [userId,    setUserId]    = useState(null)
 
   useEffect(() => {
     let mounted = true
 
     async function load() {
-      // Auth check
       const { data: { user } } = await supabase.auth.getUser()
       if (!mounted) return
 
@@ -57,31 +170,40 @@ export default function PlatformHome() {
       }
       setUserId(user.id)
 
-      // Profile + articles in parallel
-      const [{ data: prof }, { data: arts }] = await Promise.all([
-        supabase
-          .from('user_profiles')
-          .select('display_name, native_lang, learning_goal, cefr_level')
-          .eq('user_id', user.id)
-          .maybeSingle(),
-        supabase
-          .from('articles')
-          .select('id, title, slug, subtitle, level, topic_tags, word_count, cover_image_url, published_at, body_text')
-          .eq('is_published', true)
-          .order('published_at', { ascending: false })
-          .limit(12),
-      ])
+      // Profile check for onboarding
+      const { data: prof } = await supabase
+        .from('user_profiles')
+        .select('display_name, learning_goal')
+        .eq('user_id', user.id)
+        .maybeSingle()
 
       if (!mounted) return
-
-      // If no profile / incomplete onboarding, redirect
       if (!prof?.display_name || !prof?.learning_goal) {
         navigate('/onboarding', { replace: true })
         return
       }
 
-      setProfile(prof)
-      setArticles(arts || [])
+      // Latest article + podcast in parallel
+      const [{ data: latestArticle }, { data: latestPodcast }] = await Promise.all([
+        supabase
+          .from('articles')
+          .select('id, title, slug, subtitle, level')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from('podcast_episodes')
+          .select('id, title, description')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ])
+
+      if (!mounted) return
+      setArticle(latestArticle)
+      setPodcast(latestPodcast)
       setLoading(false)
     }
 
@@ -92,181 +214,72 @@ export default function PlatformHome() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="text-sm text-gray-400 animate-pulse">Loading your feed…</p>
+        <div className="w-6 h-6 border-2 border-green border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
-  const firstName = profile?.display_name?.split(' ')[0] || 'there'
+  const articleHref = article ? (article.slug ? `/articles/${article.slug}` : `/articles/${article.id}`) : '/articles'
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <PageMeta
+        title="Home — Chatter Club"
+        description="Your daily English practice hub."
+        canonical="/home"
+      />
 
-      {/* ── Welcome bar ────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-950">
-            {greeting()}, {firstName} 👋
-          </h1>
-          <div className="flex items-center gap-3 mt-1">
-            {profile.learning_goal && (
-              <p className="text-sm text-gray-400">
-                Goal: <span className="text-gray-600 font-medium">{GOAL_LABELS[profile.learning_goal]}</span>
-              </p>
-            )}
-            {profile.cefr_level ? (
-              <Link
-                to="/level-test"
-                className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors font-medium"
-              >
-                Level: {profile.cefr_level}
-              </Link>
-            ) : (
-              <Link
-                to="/level-test"
-                className="text-xs px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition-colors font-medium"
-              >
-                🎓 Find your level
-              </Link>
-            )}
-          </div>
-        </div>
+      {/* ── 1. Scrolling tile strip ─────────────────────────────────────── */}
+      <ScrollingTileStrip />
 
-        <div className="flex items-center gap-3">
-          <Link
-            to="/words"
-            className="text-sm px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            📚 Word bank
-          </Link>
-          <Link
-            to="/articles"
-            className="text-sm px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-gray-700 transition-colors"
-          >
-            Browse all
-          </Link>
-        </div>
-      </div>
+      {/* ── 2. This week ────────────────────────────────────────────────── */}
+      <section className="mb-14">
+        <SectionHeading>This week.</SectionHeading>
 
-      {/* ── Daily challenge placeholder ─────────────────────────────────────── */}
-      <DailyChallengeCard />
-
-      {/* ── Latest articles ─────────────────────────────────────────────────── */}
-      <section>
-        <h2 className="text-base font-semibold text-gray-900 mb-4">Latest articles</h2>
-
-        {articles.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="text-4xl mb-3">📰</div>
-            <p className="text-sm text-gray-400">No articles published yet. Check back soon!</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {articles.map(a => (
-              <ArticleCard key={a.id} article={a} />
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
-  )
-}
-
-// ── Daily challenge card ───────────────────────────────────────────────────────
-// Placeholder — wired up properly when daily_challenges table is built
-
-function DailyChallengeCard() {
-  return (
-    <div className="mb-8 rounded-2xl bg-gradient-to-r from-gray-900 to-gray-700 text-white overflow-hidden">
-      <div className="px-6 py-5 sm:flex sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-              Daily Challenge
-            </span>
-          </div>
-          <p className="text-lg font-bold leading-snug">
-            Coming soon 🌟
-          </p>
-          <p className="text-sm text-gray-400 mt-1">
-            Daily challenges are launching soon. In the meantime, browse the latest articles below.
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 flex-shrink-0">
-          <Link
-            to="/articles"
-            className="inline-block text-sm px-5 py-2.5 bg-white text-gray-900 rounded-xl font-medium hover:bg-gray-100 transition-colors"
-          >
-            Browse articles →
-          </Link>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Article card ───────────────────────────────────────────────────────────────
-
-function ArticleCard({ article: a }) {
-  const href    = a.slug ? `/articles/${a.slug}` : `/articles/${a.id}`
-  const excerpt = a.subtitle
-    || (a.body_text || '').split('\n').find(p => p.trim().length > 20)
-    || ''
-  const short = excerpt.length > 100 ? excerpt.slice(0, 100).trimEnd() + '…' : excerpt
-
-  return (
-    <Link
-      to={href}
-      className="group flex flex-col rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md hover:border-gray-200 transition-all"
-    >
-      {/* Cover */}
-      <div className="aspect-video overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 flex-shrink-0">
-        {a.cover_image_url ? (
-          <img
-            src={a.cover_image_url}
-            alt={a.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <WeekCard
+            colour="#4b7fc1"
+            bg="#eef3fb"
+            label="article"
+            emoji="📖"
+            title={article?.title}
+            subtitle={article?.subtitle || (article?.level ? `Level ${article.level}` : null)}
+            to={articleHref}
+            loading={false}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-4xl opacity-20">📰</span>
-          </div>
-        )}
-      </div>
+          <WeekCard
+            colour="#f4bb59"
+            bg="#fffbee"
+            label="podcast"
+            emoji="🎧"
+            title={podcast?.title}
+            subtitle={podcast?.description?.slice(0, 80) + (podcast?.description?.length > 80 ? '…' : '')}
+            to="/podcasts"
+            loading={false}
+          />
+          <WeekCard
+            colour="#f76639"
+            bg="#fff1ed"
+            label="daily challenge"
+            emoji="⚡"
+            title="Today's challenge"
+            subtitle="5 steps · builds your streak · 10 minutes"
+            to="/challenge"
+            loading={false}
+          />
+        </div>
+      </section>
 
-      {/* Body */}
-      <div className="flex flex-col flex-1 p-4">
-        {/* Level + tags */}
-        <div className="flex flex-wrap items-center gap-1.5 mb-2">
-          {a.level && (
-            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLOURS[a.level] || 'bg-gray-100 text-gray-700'}`}>
-              {a.level}
-            </span>
-          )}
-          {(a.topic_tags || []).slice(0, 2).map(tag => (
-            <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-              {tag}
-            </span>
+      {/* ── 3. Games & Puzzles ──────────────────────────────────────────── */}
+      <section>
+        <SectionHeading>Games & puzzles.</SectionHeading>
+
+        <div className="grid grid-cols-5 gap-4 sm:gap-6">
+          {PUZZLE_TILES.map(tile => (
+            <PuzzleTile key={tile.to} tile={tile} />
           ))}
         </div>
-
-        {/* Title */}
-        <h3 className="text-sm font-semibold text-gray-900 leading-snug mb-1 group-hover:text-gray-600 transition-colors line-clamp-2">
-          {a.title}
-        </h3>
-
-        {/* Excerpt */}
-        {short && (
-          <p className="text-xs text-gray-400 leading-relaxed line-clamp-2 flex-1">
-            {short}
-          </p>
-        )}
-
-        {/* Meta */}
-        <div className="mt-3 text-xs text-gray-400">
-          {readTime(a.word_count)}
-        </div>
-      </div>
-    </Link>
+      </section>
+    </div>
   )
 }

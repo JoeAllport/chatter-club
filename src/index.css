@@ -7,108 +7,92 @@
    COLOUR PALETTE
    ──────────────
    pink        #ffb1c1   Hub section accent
-   red         #f76639   Incorrect / error / danger — also Exam third colour
-   yellow      #f4bb59   Podcast accent / Business secondary
-   green       #72c09e   BRAND PRIMARY · Correct · Courses accent · Business primary
+   red         #f76639   Incorrect / error — also Exam third colour
+   yellow      #f4bb59   Podcast accent / Business secondary / Pro banner
+   green       #72c09e   BRAND PRIMARY · Correct · Courses · Business primary
    purple      #c2bdf5   Puzzles accent
    light-blue  #63c7ec   Exam secondary
    dark-blue   #4b7fc1   Exam primary
-   canvas      #fffbf5   Global page background (warm off-white — not clinical)
+   canvas      #fffbf5   Global page background (warm off-white)
 
    FONT SYSTEM
    ───────────
-   League Spartan    — headings, UI, nav, buttons, labels, exercise questions
-   Libre Baskerville — article body text only (long-form L2 reading)
+   League Spartan 800  — page titles / display headings (h1–h3) only
+   Nunito              — everything else: nav, body, buttons, labels, tiles
 
    SECTION ACCENTS
    ───────────────
-   Chatter Club hub  → pink
-   Exam Centre       → dark-blue + light-blue
-   Courses           → green
-   Puzzles           → purple
-   Podcast           → yellow
-   Daily challenge   → yellow (warm, motivating)
-   Correct feedback  → green (always, everywhere)
-   Incorrect feedback → red (always, everywhere)
-   Business / B2B    → green primary, yellow secondary, red third
+   Hub           → pink        Courses     → green
+   Exam          → dark-blue   Puzzles     → purple
+   Podcast       → yellow      Daily chal. → yellow
+   Correct       → green (always)
+   Incorrect     → red (always)
 
-   TYPOGRAPHY RATIONALE (pedagogical)
-   ────────────────────────────────────
-   Line height 1.7 body / 1.75 article — L2 readers need more interline space
-     than native readers. Research (Dyson & Haselgrove) shows ~1.5–1.8 is the
-     sweet spot for comprehension in adult learners.
-   Line length max-ch-70 — 60–70 characters per line is the accepted optimal
-     range (Baymard, 2012; Bringhurst). Too wide = harder to track, too narrow
-     = too many interruptions.
-   Letter-spacing — League Spartan is geometrically tight at small sizes.
-     A tiny positive tracking (0.01em) at body sizes opens it up without
-     looking artificially spaced. At headings we tighten slightly (-0.01em)
-     for better visual density.
-   Font size — 16px minimum UI, 18px article body. Larger than most apps but
-     appropriate for language learning where students are *studying* each word.
-   Paragraph spacing — 1em between paragraphs. Clear visual chunking aids
-     reading comprehension more than run-on text blocks.
+   TYPOGRAPHY RATIONALE
+   ────────────────────
+   Nunito is a rounded geometric sans — excellent legibility at small sizes,
+   warm and approachable. Pairs well with the bold geometric of League Spartan.
+   Base 16px / 1.6 line-height for UI. Tile labels: 13–14px / 600 weight.
+   Article body: 17px / 1.75 — comfortable for L2 reading sessions.
    ════════════════════════════════════════════════════════════════════════════ */
 
 /* ── Tailwind theme tokens ───────────────────────────────────────────────── */
 @theme {
 
   /* Palette */
-  --color-pink:        #ffb1c1;
-  --color-pink-light:  #fff0f3;
-  --color-pink-dark:   #e8869a;
+  --color-pink:         #ffb1c1;
+  --color-pink-light:   #fff0f3;
+  --color-pink-dark:    #e8869a;
 
-  --color-red:         #f76639;
-  --color-red-light:   #fff1ed;
-  --color-red-dark:    #d94e24;
+  --color-red:          #f76639;
+  --color-red-light:    #fff1ed;
+  --color-red-dark:     #d94e24;
 
-  --color-yellow:      #f4bb59;
+  --color-yellow:       #f4bb59;
   --color-yellow-light: #fffbee;
-  --color-yellow-dark: #d9a030;
+  --color-yellow-dark:  #d9a030;
 
-  --color-green:       #72c09e;
-  --color-green-light: #edf8f3;
-  --color-green-dark:  #4ea07c;
+  --color-green:        #72c09e;
+  --color-green-light:  #edf8f3;
+  --color-green-dark:   #4ea07c;
 
-  --color-purple:      #c2bdf5;
+  --color-purple:       #c2bdf5;
   --color-purple-light: #f4f3ff;
-  --color-purple-dark: #8f88d9;
+  --color-purple-dark:  #8f88d9;
 
-  --color-blue-light:  #63c7ec;
-  --color-blue-light-bg: #edf8fd;
+  --color-blue-light:      #63c7ec;
+  --color-blue-light-bg:   #edf8fd;
   --color-blue-light-dark: #3aa8cf;
 
-  --color-blue-dark:   #4b7fc1;
-  --color-blue-dark-bg: #eef3fb;
-  --color-blue-dark-deep: #2f5a96;
+  --color-blue-dark:       #4b7fc1;
+  --color-blue-dark-bg:    #eef3fb;
+  --color-blue-dark-deep:  #2f5a96;
 
-  --color-canvas:      #fffbf5;
+  --color-canvas:       #fffbf5;
 
-  /* Brand — green is the global primary */
-  --color-brand:       #72c09e;
-  --color-brand-dark:  #4ea07c;
-  --color-brand-light: #edf8f3;
+  /* Brand */
+  --color-brand:        #72c09e;
+  --color-brand-dark:   #4ea07c;
+  --color-brand-light:  #edf8f3;
 
   /* Correct / incorrect — global, non-negotiable */
-  --color-correct:     #72c09e;
-  --color-correct-bg:  #edf8f3;
-  --color-incorrect:   #f76639;
+  --color-correct:      #72c09e;
+  --color-correct-bg:   #edf8f3;
+  --color-incorrect:    #f76639;
   --color-incorrect-bg: #fff1ed;
 
   /* Fonts */
-  --font-display: 'League Spartan', system-ui, sans-serif;   /* headings / titles only */
-  --font-ui:      'Libre Baskerville', Georgia, serif;        /* everything else */
+  --font-display: 'League Spartan', system-ui, sans-serif;
+  --font-ui:      'Nunito', system-ui, sans-serif;
 }
 
 /* ── Base layer ──────────────────────────────────────────────────────────── */
 @layer base {
 
-  /* Page background — warm canvas, not stark white */
-  /* Base font: Libre Baskerville for all body/UI text */
   html {
     background-color: #fffbf5;
-    font-family: 'Libre Baskerville', Georgia, serif;
-    font-size: 15px;           /* Baskerville runs slightly larger optically than sans */
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-size: 16px;
     color: #1a1a1a;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -118,22 +102,23 @@
     background-color: #fffbf5;
   }
 
-  /* ── Headings — League Spartan Bold (display role only) ─────────────────
-     Tight tracking at large sizes. Bold weight for contrast with Baskerville body.
-     The serif/sans contrast at heading vs body is the whole point of this pairing.
+  /* ── Display headings — League Spartan only ──────────────────────────────
+     Used for page titles and major section headers.
+     All caps is optional but the typeface suits it.
+     Tight tracking at large sizes is intentional — LS is designed this way.
   */
   h1 {
     font-family: 'League Spartan', system-ui, sans-serif;
     font-weight: 800;
     letter-spacing: -0.025em;
-    line-height: 1.1;
+    line-height: 1.05;
   }
 
   h2 {
     font-family: 'League Spartan', system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em;
-    line-height: 1.2;
+    line-height: 1.15;
   }
 
   h3 {
@@ -143,31 +128,22 @@
     line-height: 1.25;
   }
 
+  /* h4–h6: Nunito (subheadings within content, card titles, labels) */
   h4, h5, h6 {
-    font-family: 'League Spartan', system-ui, sans-serif;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.3;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 700;
+    line-height: 1.35;
   }
 
-  /* ── Body / UI — Libre Baskerville ──────────────────────────────────────
-     Baskerville is designed for comfortable reading at paragraph scale.
-     Works well for nav links, buttons, labels, cards — gives the whole
-     product a warmer, less corporate tone than a sans-serif UI font.
-     Line height 1.65 — slightly looser than pure prose to work at UI sizes.
+  /* ── Body / UI — Nunito ─────────────────────────────────────────────────
+     Rounded and friendly at every size. Works for nav, body, buttons, labels.
   */
-  p, li, span, label, input, textarea, select {
-    font-family: 'Libre Baskerville', Georgia, serif;
-    line-height: 1.65;
+  p, li, span, label, input, textarea, select, button, a {
+    font-family: 'Nunito', system-ui, sans-serif;
+    line-height: 1.6;
   }
 
-  button {
-    font-family: 'Libre Baskerville', Georgia, serif;
-  }
-
-  /* Links */
   a {
-    font-family: 'Libre Baskerville', Georgia, serif;
     color: inherit;
     text-decoration: none;
   }
@@ -175,39 +151,39 @@
 
 /* ── Article reading surface ─────────────────────────────────────────────── */
 /*
-   Applied with class="article-body" on the article container.
-   Libre Baskerville is already the base font — this just sets the reading-
-   optimised size, line-height and max-width for long-form content.
-   Subheadings within articles use League Spartan (inherited from h2/h3 rules).
+   class="article-body" on the article container.
+   Nunito at 17px / 1.75 — larger than standard UI, more room for L2 readers.
+   Section subheadings still use League Spartan (inherited from h2/h3 rules).
+   Max 68ch — keeps lines in the 60-70 char optimal range.
 */
 .article-body {
-  font-size: 18px;
-  line-height: 1.8;
+  font-size: 17px;
+  line-height: 1.75;
   color: #1a1a1a;
   max-width: 68ch;
 }
 
 .article-body p {
-  font-size: 18px;
-  line-height: 1.8;
+  font-size: 17px;
+  line-height: 1.75;
   margin-bottom: 1.1em;
 }
 
 .article-body h2 {
-  /* League Spartan inherited from h2 base rule */
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   margin-top: 1.75em;
   margin-bottom: 0.5em;
 }
 
-.article-body ul, .article-body ol {
+.article-body ul,
+.article-body ol {
   padding-left: 1.5em;
   margin-bottom: 1em;
 }
 
 .article-body li {
-  font-size: 18px;
-  line-height: 1.75;
+  font-size: 17px;
+  line-height: 1.7;
   margin-bottom: 0.4em;
 }
 
@@ -216,37 +192,40 @@
 
 /* ── Exercise / question text ────────────────────────────────────────────── */
 /*
-   Applied with class="exercise-text" on MCQ, gap fill, key word items etc.
-   Libre Baskerville (base font) at 17px. Slightly larger than standard UI.
-   Generous line height — students parse each sentence carefully.
+   class="exercise-text" on MCQ, gap fill, key word items.
+   Slightly larger than standard UI — students read each sentence carefully.
 */
 .exercise-text {
-  font-size: 17px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.65;
+  font-weight: 500;
   color: #1a1a1a;
 }
 
-/* ── Nav / badge labels — keep League Spartan for small caps and badges ──── */
+/* ── Tile label style (hub + puzzle tiles) ───────────────────────────────── */
 /*
-   Very small text (labels, CEFR badges, breadcrumbs, timestamps) reads better
-   in League Spartan than Baskerville because the serif gets too fussy at tiny
-   sizes. Apply .label-text to these elements.
+   Lowercase, Nunito 700, small underline decoration.
+   Matches the screenshot aesthetic.
 */
-.label-text {
-  font-family: 'League Spartan', system-ui, sans-serif;
-  letter-spacing: 0.02em;
+.tile-label {
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
 }
 
-/* ── Section colour utilities ────────────────────────────────────────────── */
-/* Used as data-section="hub|exam|courses|puzzles|podcast" on layout wrappers */
-
+/* ── Section colour CSS variables ────────────────────────────────────────── */
+/* Set via data-section attr on layout wrappers */
 [data-section="hub"]     { --section-accent: #ffb1c1; --section-accent-bg: #fff0f3; --section-accent-dark: #e8869a; }
 [data-section="exam"]    { --section-accent: #4b7fc1; --section-accent-bg: #eef3fb; --section-accent-dark: #2f5a96; }
 [data-section="courses"] { --section-accent: #72c09e; --section-accent-bg: #edf8f3; --section-accent-dark: #4ea07c; }
 [data-section="puzzles"] { --section-accent: #c2bdf5; --section-accent-bg: #f4f3ff; --section-accent-dark: #8f88d9; }
 [data-section="podcast"] { --section-accent: #f4bb59; --section-accent-bg: #fffbee; --section-accent-dark: #d9a030; }
 
-/* ── Feedback colours — global, always consistent ────────────────────────── */
+/* ── Feedback colours ────────────────────────────────────────────────────── */
 .feedback-correct {
   background-color: #edf8f3;
   border-color: #72c09e;
@@ -259,13 +238,11 @@
   color: #b83a1a;
 }
 
-/* ── Utility classes ─────────────────────────────────────────────────────── */
+/* ── Utilities ───────────────────────────────────────────────────────────── */
 
-/* Hide scrollbar — used on second navs and tab strips */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Shake animation — used on wrong answer feedback */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%       { transform: translateX(-6px); }
@@ -273,15 +250,18 @@
   60%       { transform: translateX(-4px); }
   80%       { transform: translateX(4px); }
 }
-.animate-shake {
-  animation: shake 0.5s ease-in-out;
+.animate-shake { animation: shake 0.5s ease-in-out; }
+
+/* ── Slow auto-scroll animation (tile strip) ─────────────────────────────── */
+@keyframes scroll-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }  /* -50% because we duplicate tiles to loop */
 }
 
-/* Typing cursor — used in animated conversation on home page */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+.animate-scroll-tiles {
+  animation: scroll-left 40s linear infinite;
 }
-.animate-blink {
-  animation: blink 0.8s ease-in-out infinite;
+
+.animate-scroll-tiles:hover {
+  animation-play-state: paused;
 }
