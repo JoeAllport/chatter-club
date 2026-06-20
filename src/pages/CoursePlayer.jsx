@@ -625,206 +625,181 @@ function LockedChapter({ reason }) {
   )
 }
 
-// ─── Skill card config ────────────────────────────────────────────────────────
+// ─── Land tile colours — matches hub tile palette ────────────────────────────
 
-const SKILL_CONFIG = {
-  'Vocabulary':     { colour: 'bg-violet-500',  light: 'bg-violet-50',  text: 'text-violet-700',  border: 'border-violet-200', icon: '📖' },
-  'Use of English': { colour: 'bg-indigo-500',  light: 'bg-indigo-50',  text: 'text-indigo-700',  border: 'border-indigo-200', icon: '✏️' },
-  'Reading':        { colour: 'bg-teal-500',    light: 'bg-teal-50',    text: 'text-teal-700',    border: 'border-teal-200',   icon: '📄' },
-  'Writing':        { colour: 'bg-amber-500',   light: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200',  icon: '🖊️' },
-  'Listening':      { colour: 'bg-rose-500',    light: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200',   icon: '🎧' },
-  'Speaking':       { colour: 'bg-orange-500',  light: 'bg-orange-50',  text: 'text-orange-700',  border: 'border-orange-200', icon: '💬' },
-}
-const DEFAULT_SKILL = { colour: 'bg-gray-400', light: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200', icon: '📚' }
+const LAND_COLOURS = [
+  { colour: '#4b7fc1', bg: '#eef3fb' },   // 1  dark-blue
+  { colour: '#72c09e', bg: '#edf8f3' },   // 2  green
+  { colour: '#f4bb59', bg: '#fffbee' },   // 3  yellow
+  { colour: '#f76639', bg: '#fff1ed' },   // 4  red
+  { colour: '#c2bdf5', bg: '#f4f3ff' },   // 5  purple
+  { colour: '#63c7ec', bg: '#edf8fd' },   // 6  light-blue
+  { colour: '#ffb1c1', bg: '#fff0f3' },   // 7  pink
+  { colour: '#72c09e', bg: '#edf8f3' },   // 8  green
+  { colour: '#f4bb59', bg: '#fffbee' },   // 9  yellow
+  { colour: '#4b7fc1', bg: '#eef3fb' },   // 10 dark-blue
+]
 
-// ─── Course Home ─────────────────────────────────────────────────────────────
+// ─── Course Home — snaking path of land tiles ─────────────────────────────────
 
-function CourseHome({
-  course, units, progress, allChapters,
-  completedCount, overallPct, lockReason,
-  onStartChapter, onSelectChapter,
-}) {
-  const [expandedUnit, setExpandedUnit] = useState(null)
+function CourseHome({ course, units, progress, allChapters, completedCount, overallPct, slug, navigate }) {
+  const totalChapters = allChapters.length
 
-  // Find the next chapter: first incomplete, unlocked
-  const nextChapter = (() => {
+  // Find the overall next chapter
+  const nextChapterInfo = (() => {
     for (const unit of units) {
-      for (const ch of unit.chapters) {
-        if (!progress[ch.id]?.completed && !lockReason(ch, unit)) return { ch, unit }
-      }
+      const ch = unit.chapters.find(c => !progress[c.id]?.completed)
+      if (ch) return { unit, ch }
     }
     return null
   })()
 
-  const totalChapters = allChapters.length
   const started = completedCount > 0
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="pb-16">
 
-      {/* ── Hero ── */}
-      <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-indigo-800 px-6 pt-7 pb-6 text-white">
+      {/* ── Course hero ─────────────────────────────────────────────────── */}
+      <div className="rounded-3xl bg-green px-6 pt-6 pb-6 text-white mb-10">
         {course.level && (
-          <span className="inline-block text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 mb-3 tracking-wide uppercase">
+          <span className="inline-block text-xs font-bold px-2.5 py-1 rounded-full mb-3 tracking-wide uppercase"
+            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
             {course.level}
           </span>
         )}
-        <h1 className="text-2xl font-black leading-tight mb-1">{course.title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold leading-tight mb-1">{course.title}</h1>
         {course.description && (
-          <p className="text-sm text-indigo-200 leading-relaxed mb-5 max-w-xs">{course.description}</p>
+          <p className="text-sm leading-relaxed mb-5 max-w-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
+            {course.description}
+          </p>
         )}
 
-        {/* Progress */}
+        {/* Progress bar */}
         <div className="mb-5">
-          <div className="flex justify-between text-xs text-indigo-300 mb-1.5">
+          <div className="flex justify-between text-xs mb-1.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
             <span>{completedCount} of {totalChapters} lessons done</span>
             <span>{overallPct}%</span>
           </div>
-          <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.25)' }}>
             <div className="h-full bg-white rounded-full transition-all duration-700" style={{ width: `${overallPct}%` }} />
           </div>
         </div>
 
-        {/* Next step CTA */}
-        {nextChapter && (
+        {/* CTA — continue / start */}
+        {nextChapterInfo && (
           <button
-            onClick={() => onStartChapter(nextChapter.ch.id)}
-            className="w-full py-3.5 bg-white text-indigo-700 font-bold rounded-2xl text-sm hover:bg-indigo-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            onClick={() => navigate(`/courses/${slug}/units/${nextChapterInfo.unit.id}`)}
+            className="w-full py-3.5 bg-white font-bold rounded-2xl text-sm hover:bg-green-light active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            style={{ color: '#4ea07c' }}
           >
-            <span>{started ? 'Continue' : 'Start'}</span>
+            <span>{started ? 'Continue' : 'Start course'}</span>
             <span className="opacity-60">→</span>
-            <span className="truncate max-w-[180px]">{nextChapter.ch.title}</span>
-            {nextChapter.ch.estimated_mins && (
-              <span className="text-indigo-400 text-xs font-normal flex-shrink-0">
-                {nextChapter.ch.estimated_mins}m
-              </span>
-            )}
+            <span className="truncate max-w-[160px]">{nextChapterInfo.unit.title}</span>
           </button>
         )}
-        {!nextChapter && totalChapters > 0 && (
-          <div className="w-full py-3.5 bg-white/20 text-white font-bold rounded-2xl text-sm text-center">
+        {!nextChapterInfo && totalChapters > 0 && (
+          <div className="w-full py-3.5 font-bold rounded-2xl text-sm text-center"
+            style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}>
             🎉 All lessons complete!
           </div>
         )}
       </div>
 
-      {/* ── Skill cards ── */}
-      <div className="space-y-4">
-        {units.map((unit) => {
-          const skill   = SKILL_CONFIG[unit.title] || DEFAULT_SKILL
-          const done    = unit.chapters.filter(ch => progress[ch.id]?.completed).length
-          const total   = unit.chapters.length
-          const isOpen  = expandedUnit === unit.id
+      {/* ── Snaking land path ────────────────────────────────────────────── */}
+      <div className="relative">
 
-          // Find next chapter in this unit
-          const unitNext = unit.chapters.find(ch =>
-            !progress[ch.id]?.completed && !lockReason(ch, unit)
-          )
+        {/* Connecting line behind the tiles */}
+        <div
+          className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 rounded-full"
+          style={{ backgroundColor: '#e5e7eb', zIndex: 0 }}
+        />
 
-          return (
-            <div key={unit.id} className={cn('rounded-2xl border overflow-hidden transition-all', skill.border)}>
+        <div className="relative space-y-6" style={{ zIndex: 1 }}>
+          {units.map((unit, i) => {
+            const palette    = LAND_COLOURS[i % LAND_COLOURS.length]
+            const isLast     = i === units.length - 1
+            const done       = unit.chapters.filter(ch => progress[ch.id]?.completed).length
+            const total      = unit.chapters.length
+            const allDone    = done === total && total > 0
+            const isNext     = nextChapterInfo?.unit?.id === unit.id
+            const isLeft     = i % 2 === 0  // alternate sides for the snake
 
-              {/* Card header — tap to expand/collapse */}
-              <button
-                onClick={() => setExpandedUnit(isOpen ? null : unit.id)}
-                className={cn('w-full flex items-center gap-4 px-5 py-4 text-left', skill.light)}
+            // Progress fraction for opacity
+            const fraction = total > 0 ? done / total : 0
+            const tileOpacity = allDone ? 1 : fraction > 0 ? 0.85 : 0.6
+
+            return (
+              <div
+                key={unit.id}
+                className={cn('flex', isLeft ? 'justify-start' : 'justify-end')}
               >
-                {/* Icon + colour stripe */}
-                <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0', skill.colour)}>
-                  {skill.icon}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className={cn('font-black text-base leading-tight', skill.text)}>{unit.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {done === total && total > 0
-                      ? '✓ All done'
-                      : `${done}/${total} complete`}
-                    {unitNext && ` · Next: ${unitNext.title}`}
-                  </p>
-                </div>
-
-                {/* Progress pill */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {total > 0 && (
-                    <div className="w-16 h-1.5 bg-white/60 rounded-full overflow-hidden border border-white/40">
-                      <div
-                        className={cn('h-full rounded-full transition-all', skill.colour)}
-                        style={{ width: `${Math.round((done / total) * 100)}%` }}
-                      />
-                    </div>
+                <button
+                  onClick={() => navigate(`/courses/${slug}/units/${unit.id}`)}
+                  className={cn(
+                    'group relative flex flex-col items-center gap-2 transition-all',
+                    'active:scale-[0.96]',
                   )}
-                  <span className={cn('text-xs transition-transform duration-200', isOpen ? 'rotate-180' : '', skill.text)}>
-                    ▾
+                  style={{ width: isLast ? 120 : 100 }}
+                >
+                  {/* Tile */}
+                  <div
+                    className={cn(
+                      'rounded-2xl flex flex-col items-center justify-center gap-1 transition-all',
+                      'group-hover:scale-105 group-hover:shadow-lg',
+                      isNext && 'animate-pulse-slow',
+                    )}
+                    style={{
+                      width:           isLast ? 120 : 100,
+                      height:          isLast ? 120 : 100,
+                      backgroundColor: palette.bg,
+                      border:          `2px solid ${palette.colour}${allDone ? '60' : '30'}`,
+                      opacity:         tileOpacity,
+                      boxShadow:       isNext ? `0 0 0 3px ${palette.colour}40` : undefined,
+                    }}
+                  >
+                    {/* Unit number */}
+                    <span
+                      className="text-xs font-bold"
+                      style={{ color: palette.colour }}
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+
+                    {/* Completion check or progress fraction */}
+                    {allDone ? (
+                      <span className="text-xl">✅</span>
+                    ) : fraction > 0 ? (
+                      <div className="w-10 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: `${palette.colour}20` }}>
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${Math.round(fraction * 100)}%`, backgroundColor: palette.colour }}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {/* Label */}
+                  <span
+                    className="text-center text-xs font-bold leading-tight px-1 max-w-[110px]"
+                    style={{ color: palette.colour }}
+                  >
+                    {unit.title}
                   </span>
-                </div>
-              </button>
 
-              {/* Chapter list — shown when expanded */}
-              {isOpen && (
-                <div className="bg-white divide-y divide-gray-50">
-                  {unit.chapters.map((ch, ci) => {
-                    const chDone   = progress[ch.id]?.completed
-                    const chLocked = lockReason(ch, unit)
-                    const isNext   = ch.id === unitNext?.id
-
-                    return (
-                      <button
-                        key={ch.id}
-                        onClick={() => !chLocked && onSelectChapter(ch.id)}
-                        disabled={!!chLocked}
-                        className={cn(
-                          'w-full text-left flex items-center gap-3 px-5 py-3 transition-colors',
-                          chLocked
-                            ? 'opacity-40 cursor-default'
-                            : isNext
-                              ? cn(skill.light, 'hover:opacity-90')
-                              : 'hover:bg-gray-50'
-                        )}
-                      >
-                        {/* Status dot */}
-                        <div className={cn(
-                          'w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0',
-                          chLocked ? 'bg-gray-200 text-gray-400'
-                          : chDone  ? 'bg-green-500 text-white'
-                          : isNext  ? cn(skill.colour, 'text-white')
-                          : 'bg-gray-100 text-gray-400'
-                        )}>
-                          {chLocked ? '🔒' : chDone ? '✓' : ci + 1}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <p className={cn(
-                            'text-sm leading-snug',
-                            chDone  ? 'text-gray-400 line-through decoration-gray-300'
-                            : isNext ? cn('font-semibold', skill.text)
-                            : 'text-gray-700'
-                          )}>
-                            {ch.title}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {ch.estimated_mins && (
-                            <span className="text-xs text-gray-300">{ch.estimated_mins}m</span>
-                          )}
-                          {!chLocked && (
-                            <span className={cn(
-                              'text-xs',
-                              chDone ? 'text-gray-300' : isNext ? skill.text : 'text-gray-300'
-                            )}>
-                              {chDone ? '↩' : '→'}
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )
-        })}
+                  {/* "Next" badge */}
+                  {isNext && (
+                    <span
+                      className="absolute -top-1.5 -right-1.5 text-xs font-bold px-2 py-0.5 rounded-full text-white"
+                      style={{ backgroundColor: palette.colour, fontSize: '10px' }}
+                    >
+                      Next
+                    </span>
+                  )}
+                </button>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
@@ -1219,12 +1194,6 @@ export default function CoursePlayer() {
                 allChapters={allChapters}
                 completedCount={completedCount}
                 overallPct={overallPct}
-                lockReason={lockReason}
-                onStartChapter={(chId) => {
-                  setActiveChapterId(chId)
-                  navigate(`/courses/${slug}/chapters/${chId}`)
-                }}
-                onSelectChapter={(chId) => setActiveChapterId(chId)}
                 slug={slug}
                 navigate={navigate}
               />

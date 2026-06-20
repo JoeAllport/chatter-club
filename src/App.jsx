@@ -47,6 +47,7 @@ import ExamWriting       from './pages/exam/ExamWriting'
 // ── Courses pages (inside CoursesLayout) ─────────────────────────────────────
 import CoursesHome    from './pages/courses/CoursesHome'
 import CoursePlayer   from './pages/CoursePlayer'
+import UnitPage       from './pages/courses/UnitPage'
 
 // ── Lesson session — full screen, no layout chrome ───────────────────────────
 import LessonSession from './pages/session/LessonSession'
@@ -134,6 +135,12 @@ export default function App() {
           {/* Course player rendered inside the courses layout shell */}
           <Route path=":slug"       element={<CoursePlayer />} />
         </Route>
+
+        {/* ── Unit page — full screen, no layout chrome ─────────────────────── */}
+        <Route
+          path="/courses/:slug/units/:unitId"
+          element={<UnitPage />}
+        />
 
         {/* ── Lesson session — full screen, no layout chrome ────────────────── */}
         <Route
